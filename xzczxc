@@ -1,0 +1,1463 @@
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+<script>
+(function() {
+  // 1. สร้างฟังก์ชันช่วยแปลงรหัส HTML Entities ให้กลับเป็นข้อความปกติ (ภาษาไทย/Emoji)
+  function decodeText(encodedText) {
+    var textArea = document.createElement("textarea");
+    textArea.innerHTML = encodedText;
+    return textArea.value;
+  }
+
+  const ADMIN_KEY = 'chathai_admin_2025';
+  const STORED = localStorage.getItem('admin_session');
+  
+  // 2. ถ้ายังไม่ได้ unlock
+  if (STORED !== ADMIN_KEY) {
+    // ใช้ฟังก์ชัน decodeText() ครอบข้อความของเราเอาไว้
+    const promptMessage = decodeText('🔐 Admin Access Required\nกรอกรหัสผ่าน:');
+    const pass = prompt(promptMessage);
+    
+    if (pass === 'ChathaiManga2005') {
+      localStorage.setItem('admin_session', ADMIN_KEY);
+    } else {
+      // ใช้ฟังก์ชัน decodeText() สำหรับแจ้งเตือนเช่นกัน
+      const alertMessage = decodeText('❌ ไม่มีสิทธิ์เข้าถึง');
+      alert(alertMessage);
+      window.location.href = '/';
+    }
+  }
+})();
+</script>
+
+
+<script>
+    tailwind.config = {
+        darkMode: 'class',
+        theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['ui-monospace', 'monospace'] } } }
+    }
+</script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+    .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #1f2937; }
+    img { transition: opacity 0.3s ease-in-out; }
+    header,footer,.bg-photo ~ nav {display: none;}
+    /* Smooth Modal Transitions */
+    .modal-overlay { transition: opacity 0.3s ease; opacity: 0; pointer-events: none; }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; transform: scale(0.95); opacity: 0; }
+    .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
+    .locked-area { background-color: rgba(99, 102, 241, 0.05) !important; border-color: rgba(99, 102, 241, 0.5) !important; color: #818cf8 !important; }
+    .search-result:hover { background-color: rgba(13, 148, 136, 0.05); }
+    .history-card:hover { border-color: #0d9488; background-color: rgba(13, 148, 136, 0.05); }
+    #Blog1 {display: contents;}
+</style>
+
+<div class="bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen">
+
+<nav class="fixed top-0 z-40 w-full bg-white border-b border-gray-200 dark:bg-[#111111] dark:border-gray-800/60 transition-colors backdrop-blur-md">
+    <div class="px-3 py-3 lg:px-5 lg:pl-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center justify-start">
+                <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" type="button" class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <a href="/" class="flex ms-2 md:me-24 items-center gap-2">
+                    <div class="w-8 h-8 rounded bg-teal-600 flex items-center justify-center shadow-[0_0_15px_rgba(13,148,136,0.3)]">
+                        <i data-lucide="database" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="self-center text-xl font-bold sm:text-2xl whitespace-nowrap text-gray-900 dark:text-white flex items-center">
+                        MangaDB
+                        <span id="nav-db-info" class="ml-2 text-[10px] font-bold tracking-widest uppercase bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 border border-teal-200 dark:border-teal-800/50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> กำลังเชื่อมต่อ
+                        </span>
+                    </span>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-3 md:gap-4">
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-[#1a1a1a] dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors">
+                    <i data-lucide="sun" id="theme-icon-light" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="moon" id="theme-icon-dark" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+                <div class="flex items-center gap-3">
+                    <img class="w-10 h-10 rounded-full border-2 border-gray-200 dark:border-gray-800 object-cover" src="https://ui-avatars.com/api/?name=Admin&background=0d148&color=fff" alt="User">
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<aside id="logo-sidebar" class="fixed top-0 left-0 z-30 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-[#111111] dark:border-gray-800/60 flex flex-col">
+    <div class="flex-1 px-3 pb-4 overflow-y-auto custom-scrollbar">
+        <ul class="space-y-1 font-medium">
+            <li><span class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 mt-4 block">เมนูนำทาง</span></li>
+            <li><button onclick="scrollToEl('section-overview')" class="w-full flex items-center p-3 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1a1a1a] hover:text-white transition-colors"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span class="ms-3 text-sm font-bold">สถิติภาพรวม</span></button></li>
+            <li><button onclick="scrollToEl('section-library')" class="w-full flex items-center p-3 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1a1a1a] hover:text-white transition-colors"><i data-lucide="book-open" class="w-5 h-5"></i><span class="ms-3 text-sm font-bold">คลังมังงะ</span></button></li>
+            <li>
+                <button onclick="scrollToEl('section-health')" class="w-full flex items-center justify-between p-3 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1a1a1a] hover:text-white transition-colors">
+                    <div class="flex items-center"><i data-lucide="activity" class="w-5 h-5"></i><span class="ms-3 text-sm font-bold">ตรวจสอบสถานะ</span></div>
+                    <span id="badge-health" class="hidden flex w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+                </button>
+            </li>
+            <li><button onclick="scrollToEl('section-system')" class="w-full flex items-center p-3 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1a1a1a] hover:text-white transition-colors"><i data-lucide="server-cog" class="w-5 h-5"></i><span class="ms-3 text-sm font-bold">ระบบคอนโซล</span></button></li>
+            <li><button onclick="openGeneratorModal()" class="w-full flex items-center p-3 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1a1a1a] hover:text-white transition-colors"><i data-lucide="file-code-2" class="w-5 h-5"></i><span class="ms-3 text-sm font-bold">สร้างไฟล์ XML ลงเว็บ</span></button></li>
+        </ul>
+    </div>
+
+    <div class="p-4 bg-gray-50 dark:bg-[#0a0a0a] border-t border-gray-200 dark:border-gray-800/60 mt-auto flex flex-col gap-5">
+    
+    <div class="flex items-center justify-between">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
+            <i data-lucide="trending-up" class="w-3 h-3 text-teal-500"></i> การเติบโต
+        </p>
+        <div class="flex gap-1.5 text-[9px] font-bold">
+            <span id="stat-growth-series" class="bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 px-1.5 py-0.5 rounded shadow-sm">+0 เรื่อง</span>
+            <span id="stat-growth-chapters" class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 px-1.5 py-0.5 rounded shadow-sm">+0 ตอน</span>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 rounded-xl p-3 shadow-sm">
+        <h4 class="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+            <i data-lucide="pie-chart" class="w-3 h-3 text-gray-400"></i> สัดส่วนเนื้อหา
+        </h4>
+        <div class="space-y-2.5">
+            <div>
+                <div class="flex justify-between items-center mb-1"><span class="text-[10px] font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_rgba(59,130,246,0.5)]"></span> มังงะ (Manga)</span><span id="breakdown-manga-count" class="text-[10px] font-medium text-gray-600 dark:text-gray-400">0</span></div>
+                <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5"><div id="breakdown-manga-bar" class="bg-blue-500 h-1.5 rounded-full transition-all duration-1000" style="width: 0%"></div></div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-1"><span class="text-[10px] font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_5px_rgba(168,85,247,0.5)]"></span> มันฮวา (Manhwa)</span><span id="breakdown-manhwa-count" class="text-[10px] font-medium text-gray-600 dark:text-gray-400">0</span></div>
+                <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5"><div id="breakdown-manhwa-bar" class="bg-purple-500 h-1.5 rounded-full transition-all duration-1000" style="width: 0%"></div></div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-1"><span class="text-[10px] font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_5px_rgba(244,63,94,0.5)]"></span> มันฮัว (Manhua)</span><span id="breakdown-manhua-count" class="text-[10px] font-medium text-gray-600 dark:text-gray-400">0</span></div>
+                <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5"><div id="breakdown-manhua-bar" class="bg-rose-500 h-1.5 rounded-full transition-all duration-1000" style="width: 0%"></div></div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-1"><span class="text-[10px] font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_5px_rgba(245,158,11,0.5)]"></span> โดจิน (Doujin)</span><span id="breakdown-doujin-count" class="text-[10px] font-medium text-gray-600 dark:text-gray-400">0</span></div>
+                <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5"><div id="breakdown-doujin-bar" class="bg-amber-500 h-1.5 rounded-full transition-all duration-1000" style="width: 0%"></div></div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-1"><span class="text-[10px] font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-teal-500 shadow-[0_0_5px_rgba(20,184,166,0.5)]"></span> นิยาย (Novel)</span><span id="breakdown-novel-count" class="text-[10px] font-medium text-gray-600 dark:text-gray-400">0</span></div>
+                <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5"><div id="breakdown-novel-bar" class="bg-teal-500 h-1.5 rounded-full transition-all duration-1000" style="width: 0%"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-3 pt-1">
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3 text-teal-500"></i> IndexedDB</span>
+                <span id="stat-storage" class="text-[9px] font-mono text-teal-600 dark:text-teal-400">0KB</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1"><div id="storage-bar" class="bg-teal-500 h-1 rounded-full transition-all duration-1000" style="width: 5%"></div></div>
+        </div>
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1" title="Max ~5MB limit on standard browsers"><i data-lucide="server" class="w-3 h-3 text-indigo-500"></i> Local Storage</span>
+                <span id="stat-ls-storage" class="text-[9px] font-mono text-indigo-600 dark:text-indigo-400">0KB</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1"><div id="ls-storage-bar" class="bg-indigo-500 h-1 rounded-full transition-all duration-1000" style="width: 5%"></div></div>
+        </div>
+        
+        <div class="flex items-center justify-between mt-2 pt-3 border-t border-gray-200 dark:border-gray-800">
+            <span class="text-[9px] text-gray-400 flex items-center gap-1"><i data-lucide="activity" class="w-3 h-3"></i> Latency: <span id="stat-latency" class="font-mono text-teal-500">0ms</span></span>
+            <span class="text-[9px] text-gray-400">โหนด: <b id="stat-active" class="text-gray-600 dark:text-gray-300 font-mono">0</b></span>
+        </div>
+    </div>
+</div>
+</aside>
+
+<div class="p-4 sm:ml-64 mt-16 min-h-screen">
+
+    <div class="flex flex-wrap gap-2 mb-4 justify-end">
+            <button onclick="openStudioModal('series')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold uppercase tracking-wider rounded-md flex items-center gap-2 transition-colors shadow-sm"><i data-lucide="book-plus" class="w-4 h-4"></i> เพิ่มเรื่องใหม่</button>
+            <button onclick="openStudioModal('chapter')" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold uppercase tracking-wider rounded-md flex items-center gap-2 transition-colors shadow-sm"><i data-lucide="copy-plus" class="w-4 h-4"></i> เพิ่มตอนใหม่</button>
+            
+            <div class="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-1 hidden sm:block"></div>
+            
+            <button onclick="exportDatabase()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 text-[11px] font-bold uppercase tracking-wider rounded-md flex items-center gap-2 transition-colors"><i data-lucide="file-down" class="w-4 h-4"></i> สำรองข้อมูล</button>
+            <button onclick="startFullSync()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold uppercase tracking-wider rounded-md flex items-center gap-2 transition-colors shadow-sm"><i data-lucide="database-zap" class="w-4 h-4"></i> ซิงค์เต็มรูปแบบ</button>
+            <button onclick="forceSync()" class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-[11px] font-bold uppercase tracking-wider rounded-md flex items-center gap-2 transition-colors shadow-sm"><i data-lucide="refresh-cw" class="w-4 h-4" id="sync-icon"></i> ซิงค์อัจฉริยะ</button>
+            <button onclick="nukeDatabase()" title="ล้างฐานข้อมูล" class="px-2 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-800/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 text-[11px] font-bold rounded-md flex items-center transition-colors"><i data-lucide="skull" class="w-4 h-4"></i></button>
+        </div>
+
+    <section id="section-overview" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 scroll-mt-24">
+        <div class="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden group hover:border-teal-500/50 transition-colors">
+            <div class="flex justify-between items-start z-10"><div class="w-8 h-8 rounded bg-teal-50 dark:bg-teal-500/10 flex items-center justify-center text-teal-600 dark:text-teal-400"><i data-lucide="book-open" class="w-4 h-4"></i></div></div>
+            <div class="z-10"><h3 id="dash-total-series" class="text-3xl font-black text-gray-900 dark:text-white">0</h3><p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">เรื่องทั้งหมด</p></div>
+            <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:opacity-10 transition-opacity"><i data-lucide="book-open" class="w-32 h-32 text-teal-500"></i></div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden group hover:border-indigo-500/50 transition-colors">
+            <div class="flex justify-between items-start z-10"><div class="w-8 h-8 rounded bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400"><i data-lucide="layers" class="w-4 h-4"></i></div></div>
+            <div class="z-10"><h3 id="dash-total-chapters" class="text-3xl font-black text-gray-900 dark:text-white">0</h3><p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">ตอนทั้งหมด</p></div>
+            <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:opacity-10 transition-opacity"><i data-lucide="layers" class="w-32 h-32 text-indigo-500"></i></div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden group hover:border-amber-500/50 transition-colors">
+            <div class="flex justify-between items-start z-10"><div class="w-8 h-8 rounded bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400"><i data-lucide="shield-check" class="w-4 h-4"></i></div></div>
+            <div class="z-10"><h3 id="dash-locked-items" class="text-3xl font-black text-gray-900 dark:text-white">0</h3><p class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">รายการที่ถูกล็อกไว้</p></div>
+            <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:opacity-10 transition-opacity"><i data-lucide="shield-check" class="w-32 h-32 text-amber-500"></i></div>
+        </div>
+    </section>
+
+    <section id="section-library" class="mb-6 scroll-mt-24">
+    <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 rounded-2xl shadow-sm overflow-hidden">
+        
+        <div class="p-5 border-b border-gray-200 dark:border-gray-800/60 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="database" class="w-5 h-5 text-teal-500"></i> คลังข้อมูลมังงะ
+            </h2>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative w-full sm:w-64">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-gray-400"></i></div>
+                    <input type="text" id="lib-search" oninput="handleLibraryFilter()" placeholder="ค้นหาจากชื่อ..." class="bg-gray-50 dark:bg-[#0a0a0a] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full pl-9 p-2.5 outline-none transition-colors">
+                </div>
+                <select id="lib-type-filter" onchange="handleLibraryFilter()" class="bg-gray-50 dark:bg-[#0a0a0a] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full sm:w-auto p-2.5 outline-none font-medium transition-colors">
+                    <option value="all">เนื้อหาทั้งหมด</option><option value="series">เรื่องมังงะ</option><option value="chapter">ตอนมังงะ</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="batch-toolbar" class="hidden bg-indigo-50/80 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/30 px-5 py-3 items-center justify-between animate-[pulse_0.5s_ease-out_1]">
+            <span id="batch-count-text" class="text-xs font-bold text-indigo-700 dark:text-indigo-400">เลือก 0 รายการ</span>
+            <div class="flex items-center gap-2">
+                <button onclick="executeBatchAction('protect')" class="px-3 py-1.5 bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:hover:bg-amber-800/40 rounded text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5"><i data-lucide="lock" class="w-3 h-3"></i> ล็อก</button>
+                <button onclick="executeBatchAction('unprotect')" class="px-3 py-1.5 bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 rounded text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5"><i data-lucide="unlock" class="w-3 h-3"></i> ปลดล็อก</button>
+                <button onclick="executeBatchAction('delete')" class="px-3 py-1.5 bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/40 rounded text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5 ml-2"><i data-lucide="trash-2" class="w-3 h-3"></i> ลบ</button>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead class="text-[10px] uppercase bg-gray-50 dark:bg-[#0a0a0a] text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800/60">
+                    <tr>
+                        <th class="px-4 py-4 w-4 text-center">
+                            <input type="checkbox" id="checkbox-all" onclick="toggleSelectAllVisible(this)" class="w-4 h-4 text-teal-600 bg-gray-100 border-gray-300 rounded focus:ring-teal-500 dark:focus:ring-teal-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                        </th>
+                        <th class="px-2 py-4 font-bold tracking-widest">ข้อมูลเนื้อหา</th>
+                        <th class="px-6 py-4 font-bold tracking-widest text-center">สถานะ</th>
+                        <th class="px-6 py-4 font-bold tracking-widest text-center">ประเภท</th>
+                        <th class="px-6 py-4 font-bold tracking-widest text-center">การล็อก</th>
+                        <th class="px-6 py-4 font-bold tracking-widest text-right">จัดการ</th>
+                    </tr>
+                 </thead>
+                <tbody id="library-tbody" class="divide-y divide-gray-100 dark:divide-gray-800/50"></tbody>
+            </table>
+        </div>
+        
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-800/60 flex items-center justify-between bg-gray-50 dark:bg-[#0a0a0a]">
+            <span class="text-xs text-gray-500 dark:text-gray-400">แสดง <span id="pag-start" class="font-bold text-gray-900 dark:text-white">0</span> ถึง <span id="pag-end" class="font-bold text-gray-900 dark:text-white">0</span> จาก <span id="pag-total" class="font-bold text-gray-900 dark:text-white">0</span> รายการ</span>
+            <div class="inline-flex">
+                <button id="btn-prev" onclick="changePage(-1)" class="px-3 h-8 text-xs font-bold uppercase tracking-wider text-gray-700 bg-white border border-gray-300 rounded-s hover:bg-gray-100 dark:bg-[#1a1a1a] dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors">ก่อนหน้า</button>
+                <button id="btn-next" onclick="changePage(1)" class="px-3 h-8 text-xs font-bold uppercase tracking-wider text-gray-700 bg-white border border-l-0 border-gray-300 rounded-e hover:bg-gray-100 dark:bg-[#1a1a1a] dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors">ถัดไป</button>
+             </div>
+        </div>
+    </div>
+</section>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <section id="section-health" class="xl:col-span-2 scroll-mt-24 flex flex-col">
+            <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 rounded-2xl shadow-sm overflow-hidden flex-1 flex flex-col">
+                <div class="p-5 border-b border-gray-200 dark:border-gray-800/60 flex justify-between items-center bg-white dark:bg-[#111111]">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2"><i data-lucide="stethoscope" class="w-5 h-5 text-teal-500"></i> ตรวจสอบข้อผิดพลาด</h2>
+                    <div class="flex gap-2">
+                        <button onclick="resolveAllOrphans()" id="btn-resolve-all" class="hidden px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors">ซ่อมแซมทั้งหมด</button>
+                        <button onclick="purgeAllOrphans()" id="btn-purge-all" class="hidden px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors">ล้างข้อมูลที่เสีย</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto flex-1 bg-gray-50 dark:bg-[#0a0a0a]">
+                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead class="text-[10px] uppercase bg-white dark:bg-[#111111] text-gray-500 border-b border-gray-200 dark:border-gray-800/60">
+                            <tr>
+                                <th class="px-6 py-4 font-bold tracking-widest">รายการที่มีปัญหา</th>
+                                <th class="px-6 py-4 font-bold tracking-widest">ข้อผิดพลาดที่พบ</th>
+                                <th class="px-6 py-4 font-bold tracking-widest text-right">แก้ไข</th>
+                            </tr>
+                         </thead>
+                        <tbody id="health-results-body" class="divide-y divide-gray-200 dark:divide-gray-800/60"></tbody>
+                    </table>
+                </div>
+                <div id="health-pagination-wrapper" class="hidden px-6 py-3 border-t border-gray-200 dark:border-gray-800/60 flex items-center justify-between bg-white dark:bg-[#111111]">
+                    <span class="text-[11px] text-gray-500 dark:text-gray-400">ปัญหา: <span id="h-pag-start" class="font-bold">0</span>-<span id="h-pag-end" class="font-bold">0</span> จาก <span id="h-pag-total" class="font-bold text-red-500">0</span></span>
+                    <div class="inline-flex gap-1">
+                        <button id="h-btn-prev" onclick="changeHealthPage(-1)" class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-700 bg-gray-100 rounded hover:bg-gray-200 dark:bg-[#1a1a1a] dark:text-gray-300 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors">ก่อนหน้า</button>
+                        <button id="h-btn-next" onclick="changeHealthPage(1)" class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-700 bg-gray-100 rounded hover:bg-gray-200 dark:bg-[#1a1a1a] dark:text-gray-300 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors">ถัดไป</button>
+                    </div>
+                </div>
+            </div>
+         </section>
+
+        <section id="section-system" class="space-y-6 scroll-mt-24">
+            <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 rounded-2xl shadow-sm p-5 flex flex-col h-80">
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4 text-gray-500"></i> คอนโซลระบบ</h3>
+                <div class="flex-1 bg-gray-900 dark:bg-black rounded-xl border border-gray-800 p-3 overflow-hidden flex flex-col shadow-inner relative">
+                    <div class="flex gap-2 mb-2 pb-2 border-b border-gray-800">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div><div class="w-3 h-3 rounded-full bg-yellow-500"></div><div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div id="terminal-output" class="flex-1 overflow-y-auto text-teal-400 font-mono text-[11px] space-y-1 custom-scrollbar pr-2 leading-relaxed"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div id="crud-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
+    <div class="modal-content w-full max-w-2xl bg-white dark:bg-[#111111] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800/80 overflow-hidden flex flex-col md:flex-row">
+        
+        <div class="w-full md:w-2/5 bg-gray-100 dark:bg-[#0a0a0a] p-6 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800/80 flex flex-col items-center justify-center relative group">
+            <div class="w-full aspect-[3/4] rounded-xl overflow-hidden shadow-lg border border-gray-300 dark:border-gray-700 relative">
+                <img id="modal-preview-img" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgcpJA-XCwTra_3S53QFkfxXEKsI1FOZtpBB-vUksTY1qod7mc9V-XizRUu_dJA6KolOwCSUhpQgJCCouTzs-sap-7MhnNGrwZA041TxWTq2RAVFIrweNNeHFjIRUwKF-OpZGijYnajmNVG0zz3ZaOfTWD2XJ4pBv81txeBfTzFpmivnnHzXjlxyvLvf-9u/h324-w200-c/0.webp" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Preview">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="absolute bottom-3 left-3 right-3 text-center">
+                    <span id="modal-preview-type" class="px-2 py-1 text-[9px] font-bold uppercase tracking-wider bg-teal-500 text-white rounded backdrop-blur shadow-sm">เรื่อง</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full md:w-3/5 flex flex-col">
+            <div class="flex items-center justify-between p-4 md:p-5 border-b dark:border-gray-800/80">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="edit-3" class="w-5 h-5 text-teal-500"></i> แก้ไขข้อมูล
+                </h3>
+                <button type="button" onclick="closeModal()" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 flex justify-center items-center dark:hover:bg-gray-800 dark:hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <form id="edit-form" class="p-4 md:p-5 flex-1 flex flex-col justify-between" onsubmit="saveEditedData(event)">
+                <div class="space-y-4">
+                    <input type="hidden" id="edit-id"><input type="hidden" id="edit-type">
+                    
+                    <div>
+                        <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">ชื่อเรื่อง / ชื่อตอน</label>
+                        <input type="text" id="edit-title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full p-2.5 dark:bg-[#0a0a0a] dark:border-gray-700 dark:placeholder-gray-500 dark:text-white outline-none transition-colors" required>
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">URL รูปหน้าปก</label>
+                        <input type="url" id="edit-image" oninput="document.getElementById('modal-preview-img').src=this.value" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full p-2.5 dark:bg-[#0a0a0a] dark:border-gray-700 dark:placeholder-gray-500 dark:text-white outline-none transition-colors">
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="w-1/2">
+                            <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">ชื่อเรื่องหลัก (Parent Tag)</label>
+                            <input type="text" id="edit-tag" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full p-2.5 dark:bg-[#0a0a0a] dark:border-gray-700 dark:text-white outline-none transition-colors">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">สถานะ</label>
+                            <select id="edit-status" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full p-2.5 dark:bg-[#0a0a0a] dark:border-gray-700 dark:text-white outline-none transition-colors">
+                                <option value="Ongoing">กำลังแปล (Ongoing)</option><option value="Completed">จบแล้ว (Completed)</option><option value="Release">อัพเดตตอน (Release)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t dark:border-gray-800/80">
+                    <button type="submit" class="w-full text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 font-bold rounded-lg text-sm px-5 py-3 text-center transition-colors flex justify-center items-center shadow-lg shadow-teal-500/20">
+                        <i data-lucide="save" class="w-4 h-4 mr-2"></i> บันทึก & ล็อกข้อมูล
+                    </button>
+                    <p class="text-center text-[10px] text-gray-500 mt-2"><i data-lucide="lock" class="w-3 h-3 inline"></i> การบันทึกจะล็อกข้อมูลนี้จากการซิงค์อัตโนมัติในอนาคต</p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="studio-modal" class="modal-overlay fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/80 backdrop-blur-md p-4 sm:p-6">
+    <div class="modal-content w-full max-w-5xl h-[90vh] bg-white dark:bg-[#0a0a0a] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden">
+        
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-[#111111]">
+            <h2 class="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2 tracking-tight">
+                <i data-lucide="boxes" class="w-6 h-6 text-indigo-500"></i> ครีเอเตอร์สตูดิโอ <span class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-[10px] uppercase tracking-widest px-2 py-0.5 rounded ml-2">Blogger API v3</span>
+            </h2>
+            <button onclick="closeStudioModal()" class="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-200 dark:hover:text-white dark:hover:bg-gray-800 rounded-lg transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="flex flex-1 overflow-hidden">
+            
+            <div class="w-48 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] flex flex-col p-4 gap-2">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">พื้นที่ทำงาน</p>
+                <button id="studio-tab-series" onclick="switchStudioTab('series')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors bg-teal-600 text-white">
+                    <i data-lucide="book-plus" class="w-4 h-4"></i> เพิ่มเรื่องใหม่
+                </button>
+                <button id="studio-tab-chapter" onclick="switchStudioTab('chapter')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i data-lucide="copy-plus" class="w-4 h-4"></i> เพิ่มตอนย่อย
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar bg-gray-50/50 dark:bg-[#0d0d0d] p-6 relative">
+                
+                <form id="studio-form-series" onsubmit="submitMockupSeries(event)" class="space-y-6">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 rounded bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center"><i data-lucide="book-plus" class="w-4 h-4 text-teal-600 dark:text-teal-400"></i></div>
+                        <div><h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">สร้างเรื่องมังงะใหม่</h3><p class="text-[11px] text-gray-500">ลงทะเบียนข้อมูลเรื่องใหม่เข้าสู่ระบบฐานข้อมูล</p></div>
+                    </div>
+
+                    <div class="flex flex-col xl:flex-row gap-6">
+                        <div class="w-full xl:w-1/3 space-y-4">
+                            <div class="aspect-[3/4] w-full rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/50 overflow-hidden relative flex items-center justify-center group">
+                                <img id="studio-series-preview" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgcpJA-XCwTra_3S53QFkfxXEKsI1FOZtpBB-vUksTY1qod7mc9V-XizRUu_dJA6KolOwCSUhpQgJCCouTzs-sap-7MhnNGrwZA041TxWTq2RAVFIrweNNeHFjIRUwKF-OpZGijYnajmNVG0zz3ZaOfTWD2XJ4pBv81txeBfTzFpmivnnHzXjlxyvLvf-9u/h324-w200-c/0.webp" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm"><span class="text-white text-xs font-bold"><i data-lucide="image" class="w-6 h-6 mx-auto mb-1"></i> แสดงตัวอย่าง</span></div>
+                            </div>
+                            <div>
+                                <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">ลิงก์หน้าปก (URL)</label>
+                                <input type="url" required oninput="document.getElementById('studio-series-preview').src=this.value" placeholder="https://..." class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2.5 dark:bg-[#111111] dark:border-gray-700 dark:text-white outline-none transition-colors">
+                            </div>
+                        </div>
+
+                        <div class="w-full xl:w-2/3 space-y-4">
+                            <div>
+                                <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">ชื่อเรื่องหลัก</label>
+                                <input type="text" required placeholder="เช่น Solo Leveling" class="w-full bg-white border border-gray-300 text-gray-900 text-base font-bold rounded-lg focus:ring-teal-500 focus:border-teal-500 p-3 dark:bg-[#111111] dark:border-gray-700 dark:text-white outline-none transition-colors">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">ประเภท (ป้ายกำกับ)</label>
+                                    <select class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2.5 dark:bg-[#111111] dark:border-gray-700 dark:text-white outline-none">
+                                        <option>Manga</option><option>Manhwa</option><option>Manhua</option><option>Comic</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">สถานะ (ป้ายกำกับ)</label>
+                                    <select class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2.5 dark:bg-[#111111] dark:border-gray-700 dark:text-white outline-none">
+                                        <option>Ongoing</option><option>Completed</option><option>Hiatus</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">เรื่องย่อ (เนื้อหา)</label>
+                                <textarea rows="5" required placeholder="เขียนเรื่องย่อที่นี่..." class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-3 dark:bg-[#111111] dark:border-gray-700 dark:text-white outline-none custom-scrollbar transition-colors"></textarea>
+                            </div>
+                            <div>
+                                <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">หมวดหมู่ (คั่นด้วยลูกน้ำ)</label>
+                                <input type="text" placeholder="Action, Fantasy, System..." class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2.5 dark:bg-[#111111] dark:border-gray-700 dark:text-white outline-none transition-colors">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-4 flex justify-end">
+                        <button id="btn-submit-series" type="submit" class="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-lg shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center disabled:opacity-50">
+                            <i data-lucide="cloud-upload" class="w-4 h-4 mr-2"></i> เผยแพร่เรื่องนี้
+                        </button>
+                    </div>
+                </form>
+
+                <form id="studio-form-chapter" onsubmit="submitMockupChapter(event)" class="hidden space-y-6">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 rounded bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center"><i data-lucide="copy-plus" class="w-4 h-4 text-rose-600 dark:text-rose-400"></i></div>
+                        <div><h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">อัพโหลดตอนใหม่ (Mass Upload)</h3><p class="text-[11px] text-gray-500">อัพโหลดรูปภาพและเชื่อมกับชื่อเรื่องหลัก</p></div>
+                    </div>
+
+                    <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 p-5 rounded-xl space-y-4 shadow-sm">
+                        <div>
+                            <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">เลือกเรื่องหลัก <span class="text-red-500">*</span></label>
+                            <select id="studio-chapter-parent" required class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 p-3 dark:bg-[#0a0a0a] dark:border-gray-700 dark:text-white outline-none cursor-pointer">
+                               <option value="">กำลังโหลดรายชื่อเรื่อง...</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">ตอนที่ <span class="text-red-500">*</span></label>
+                                <input type="number" step="0.1" required placeholder="เช่น 14.5" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm font-bold rounded-lg focus:ring-rose-500 focus:border-rose-500 p-3 dark:bg-[#0a0a0a] dark:border-gray-700 dark:text-white outline-none">
+                            </div>
+                            <div>
+                                <label class="block mb-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">ชื่อตอน (ไม่บังคับ)</label>
+                                <input type="text" placeholder="เช่น การตื่นรู้" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 p-3 dark:bg-[#0a0a0a] dark:border-gray-700 dark:text-white outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800 p-5 rounded-xl space-y-2 shadow-sm">
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest">ลิงก์รูปภาพ (Batch Entry)</label>
+                            <span class="text-[9px] text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">1 ลิงก์ต่อ 1 บรรทัด</span>
+                        </div>
+                        <textarea rows="10" required placeholder="https://cdn.example.com/img_01.jpg&#10;https://cdn.example.com/img_02.jpg&#10;https://cdn.example.com/img_03.jpg" class="w-full bg-gray-50 border border-gray-300 text-gray-900 font-mono text-xs rounded-lg focus:ring-rose-500 focus:border-rose-500 p-3 dark:bg-[#0a0a0a] dark:border-gray-700 dark:text-white outline-none custom-scrollbar leading-relaxed"></textarea>
+                    </div>
+
+                    <div class="pt-2 flex justify-end">
+                        <button id="btn-submit-chapter" type="submit" class="px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-lg shadow-lg shadow-rose-500/30 transition-all flex items-center justify-center disabled:opacity-50">
+                            <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> เผยแพร่ตอนนี้
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="generator-modal" class="modal-overlay fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/80 backdrop-blur-md p-4 sm:p-6">
+    <div class="modal-content w-full max-w-7xl h-[95vh] bg-gray-50 dark:bg-[#0a0a0a] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden">
+        
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111111]">
+            <h2 class="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2 tracking-tight">
+                <i data-lucide="file-json-2" class="w-6 h-6 text-indigo-500"></i> Blogger XML Generator <span class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-[10px] uppercase tracking-widest px-2 py-0.5 rounded ml-2">MAL Engine</span>
+            </h2>
+            <div class="flex items-center gap-4">
+                <button onclick="location.reload()" class="bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800/50 px-3 py-1.5 rounded-lg font-mono text-[10px] font-bold uppercase transition-colors flex items-center gap-2"><i data-lucide="rotate-ccw" class="w-3 h-3"></i> รีเซ็ต</button>
+                <div class="w-px h-6 bg-gray-300 dark:bg-gray-700"></div>
+                <button onclick="closeGeneratorModal()" class="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-200 dark:hover:text-white dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
+            <div class="w-full grid grid-cols-1 xl:grid-cols-[280px_1fr_300px] gap-6 items-start">
+                
+                <aside class="space-y-6">
+                    <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 rounded-2xl p-5 shadow-sm h-fit sticky top-0">
+                        <div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-800/60 pb-2 mb-4 flex items-center gap-2"><i data-lucide="image" class="w-4 h-4"></i> ตัวอย่างมังงะ</div>
+                        <img id="prev-img" src="https://placehold.co/400x600?text=Search+Manga" class="w-full aspect-[2/3] object-cover rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 mb-4 transition-all">
+                        <h2 id="prev-title" class="font-bold text-lg text-gray-900 dark:text-white mb-1 leading-tight">ชื่อมังงะ</h2>
+                        <div id="prev-meta" class="text-teal-600 dark:text-teal-400 text-[10px] font-mono uppercase mb-3">สถานะ: -</div>
+                        <p id="prev-desc" class="text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-5 italic border-t border-gray-200 dark:border-gray-800/60 pt-3 custom-scrollbar">รายละเอียดมังงะจะแสดงที่นี่...</p>
+                    </div>
+                </aside>
+
+                <main class="space-y-6">
+                    <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 rounded-2xl p-5 shadow-sm space-y-6">
+                        
+                        <div class="relative space-y-2">
+                            <label class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest">ค้นหาฐานข้อมูลจาก MyAnimeList</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-gray-400"></i></div>
+                                <input type="text" id="search-import" placeholder="พิมพ์ชื่อมังงะภาษาอังกฤษหรือญี่ปุ่น..." class="w-full bg-gray-50 dark:bg-[#0a0a0a] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-teal-500 focus:border-teal-500 text-sm font-medium transition-colors" autocomplete="off">
+                            </div>
+                            <div id="search-results" class="absolute left-0 right-0 mt-2 bg-white dark:bg-[#151515] border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-800 rounded-xl shadow-2xl z-50 hidden max-h-[250px] overflow-y-auto custom-scrollbar"></div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="md:col-span-2 space-y-1.5">
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-widest">ชื่อเรื่อง</span>
+                                <input type="text" id="m-title" class="w-full bg-gray-50 dark:bg-[#0a0a0a] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 outline-none font-medium text-sm transition-colors">
+                            </div>
+                            <div class="md:col-span-4 space-y-1.5 pt-2">
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-widest flex items-center gap-1">
+                                    <i data-lucide="list-ordered" class="w-3 h-3 text-indigo-500"></i> ลิสต์รายชื่อตอน (รองรับตอนย่อย เช่น 1, 1.5, 2)
+                                </span>
+                                <input type="text" id="m-custom-chapters" placeholder="เว้นว่างไว้หากต้องการใช้ ตอนเริ่มต้น-สิ้นสุด ด้านบน หรือพิมพ์ 1, 1.5, 2, 3" 
+                                    class="w-full bg-gray-50 dark:bg-[#0a0a0a] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 outline-none text-sm transition-colors font-mono">
+                            </div>
+                            <div class="md:col-span-4 space-y-1.5 pt-2">
+                                <span class="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-widest flex items-center gap-1"><i data-lucide="pen-tool" class="w-3 h-3 text-teal-500"></i> เรื่องย่อ (ตรวจสอบและแก้ไขได้)</span>
+                                <textarea id="m-desc" rows="4" class="w-full bg-gray-50 dark:bg-[#0a0a0a] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 outline-none text-sm transition-colors custom-scrollbar" placeholder="เนื้อหาเรื่องย่อภาษาไทยจะปรากฏที่นี่ คุณสามารถเกลาประโยคให้สวยงามขึ้นได้ก่อนดาวน์โหลด XML..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="p-5 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800/30 rounded-xl space-y-4 shadow-sm">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                                <h4 class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2"><i data-lucide="shield" class="w-4 h-4"></i> ระบบเข้ารหัส</h4>
+                                <button onclick="lockAllChapters()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase tracking-widest transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20">
+                                    <i data-lucide="lock" class="w-3 h-3"></i> ล็อกทั้งหมด
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 items-center pt-2">
+                                <div class="space-y-1.5">
+                                    <span class="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-widest">รหัสผ่านสำหรับ Vault</span>
+                                    <input type="password" id="vault-password" placeholder="ใส่รหัสผ่าน..." class="w-full bg-white dark:bg-[#0a0a0a] border border-indigo-200 dark:border-indigo-800/50 text-gray-900 dark:text-white rounded-lg px-3 py-2 outline-none font-mono text-sm focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                                </div>
+                                <div class="flex flex-wrap gap-4 items-center xl:justify-end xl:pt-5">
+                                    <div class="flex items-center gap-2 border-r border-gray-300 dark:border-gray-700 pr-4">
+                                        <span class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest">Res:</span>
+                                        <select id="img-res" class="bg-white dark:bg-[#0a0a0a] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg px-2 py-1.5 text-[11px] font-mono outline-none">
+                                            <option value="original">ต้นฉบับ</option><option value="s0">s0</option><option value="s1600">s1600</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">สถานะโพสต์:</span>
+                                        <select id="post-status" class="bg-white dark:bg-[#0a0a0a] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg px-2 py-1.5 text-[11px] font-mono outline-none">
+                                            <option value="published">เผยแพร่เลย</option><option value="draft">บันทึกร่าง (Draft)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 rounded-2xl p-5 shadow-sm space-y-4">
+                        <h3 class="font-bold text-gray-900 dark:text-white uppercase tracking-widest text-[11px] border-b border-gray-200 dark:border-gray-800/60 pb-3 flex items-center gap-2"><i data-lucide="edit" class="w-4 h-4 text-teal-500"></i> ตัวแก้ไขเนื้อหาในตอน</h3>
+                        <!-- Bulk Auto-Fetch Panel -->
+                        <div class="bg-blue-50/80 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800/30 rounded-xl p-4 space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                                    <i data-lucide="bot" class="w-4 h-4"></i> ดึงรูปอัตโนมัติ (Bulk)
+                                </h4>
+                                <button onclick="bulkAutoFetch()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-lg flex items-center gap-1.5 transition-colors">
+                                    <i data-lucide="zap" class="w-3 h-3"></i> ดึงทุกตอน
+                                </button>
+                            </div>
+                            <input type="text" id="bulk-url-pattern" 
+                                placeholder="https://site.com/manga-name/chapter-{n}/"
+                                class="w-full bg-white dark:bg-[#0a0a0a] border border-blue-200 dark:border-blue-700 rounded-lg px-3 py-2 text-sm font-mono outline-none focus:border-blue-500 transition-colors text-gray-900 dark:text-white" />
+                            <p class="text-[10px] text-blue-500">ใช้ <code class="bg-blue-100 dark:bg-blue-900/30 px-1 rounded">{n}</code> แทนเลขตอน — ระบบดึงทีละตอน ช้าๆ 2 วินาที เพื่อไม่โดน ban</p>
+                        </div>
+                        <div id="chapter-list-container" class="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                            <div class="text-center py-10 text-gray-400 dark:text-gray-500 italic text-xs">ส่วนที่ให้แก้ไขจะแสดงหลังจากคุณเลือกเรื่องมังงะแล้ว</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-[1fr_240px] gap-4">
+                            <button id="btn-dl-series" onclick="dlSeries()" class="bg-teal-600 hover:bg-teal-700 text-white p-4 rounded-xl flex flex-col items-center justify-center gap-1 transition-all opacity-50 cursor-not-allowed shadow-md shadow-teal-500/20" disabled>
+                                <span class="font-bold uppercase tracking-wider text-[11px] flex items-center gap-2"><i data-lucide="download-cloud" class="w-4 h-4"></i> ดาวน์โหลด XML ตัวเปิดเรื่อง</span>
+                            </button>
+                            <div id="chap-btns" class="grid grid-cols-2 gap-2"></div>
+                        </div>
+                    </div>
+                </main>
+
+                <aside class="space-y-6">
+                    <div class="bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-800/60 rounded-2xl p-5 shadow-sm h-fit sticky top-0 flex flex-col gap-4 max-h-[85vh]">
+                        <div class="text-[10px] font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-800/60 pb-2 flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> ประวัติการทำงาน</div>
+                        <div id="history-list" class="space-y-3 overflow-y-auto custom-scrollbar pr-1">
+                            <div class="text-center py-10 text-gray-400 dark:text-gray-500 text-[10px] font-mono uppercase">ไม่มีประวัติ</div>
+                        </div>
+                    </div>
+                </aside>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="script-main">
+/*<![CDATA[*/
+lucide.createIcons();
+const DEFAULT_IMG = "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgcpJA-XCwTra_3S53QFkfxXEKsI1FOZtpBB-vUksTY1qod7mc9V-XizRUu_dJA6KolOwCSUhpQgJCCouTzs-sap-7MhnNGrwZA041TxWTq2RAVFIrweNNeHFjIRUwKF-OpZGijYnajmNVG0zz3ZaOfTWD2XJ4pBv81txeBfTzFpmivnnHzXjlxyvLvf-9u/h324-w200-c/0.webp";
+
+// Helper: ถอดรหัส HTML Entities ที่ Blogger แปลงอัตโนมัติ (Anti-Encoding)
+const tDec = (str) => { 
+    if(!str) return "";
+    const txt = document.createElement("textarea"); 
+    txt.innerHTML = str; 
+    return txt.value; 
+};
+
+// --- 1. ENHANCED SYSTEM LOGGING & UTILS ---
+function scrollToEl(id) { const el = document.getElementById(id); if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+function toggleTheme() { const html = document.documentElement; if(html.classList.contains('dark')) { html.classList.remove('dark'); localStorage.setItem('theme', 'light'); } else { html.classList.add('dark'); localStorage.setItem('theme', 'dark'); } }
+if(localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
+
+(function () {
+    const term = document.getElementById("terminal-output"); 
+    const oldLog = console.log; const oldWarn = console.warn; const oldError = console.error;
+    function appendLog(type, action, msg) {
+        if (!term) return; 
+        const t = new Date().toLocaleTimeString('th-TH', { hour12: false }); 
+        let color = 'text-teal-400'; if(type === 'warn') color = 'text-amber-400'; if(type === 'error') color = 'text-red-400';
+        term.innerHTML += `<div class="py-1 border-b border-gray-800/50 flex gap-2"><span class="text-gray-500 font-mono">[${t}]</span> <span class="font-bold ${color} uppercase tracking-wider">[${action}]</span> <span class="text-gray-300">${msg}</span></div>`; 
+        term.scrollTop = term.scrollHeight;
+    }
+    console.log = function (...a) { 
+        oldLog.apply(console, a); let text = a.join(" "); let action = "ระบบ";
+        if(text.includes("[DB")) action = "ฐานข้อมูล"; else if(text.includes("[Editor]")) action = "ตัวแก้ไข-GUI";
+        else if(text.includes("[Sync]")) { action = "ซิงค์เอ็นจิ้น"; if(text.includes("Finished") || text.includes("Success")) { const icon = document.getElementById("sync-icon"); if(icon) icon.classList.remove("animate-spin"); initializeDashboard(); } }
+        appendLog('log', action, text.replace(/\[.*?\]/g, '').trim()); 
+    };
+    console.warn = function (...a) { oldWarn.apply(console, a); let text = a.join(" "); appendLog('warn', text.includes("[Sync]") ? 'การแจ้งเตือนซิงค์' : 'คำเตือน', text.replace(/\[.*?\]/g, '').trim()); };
+    console.error = function (...a) { oldError.apply(console, a); appendLog('error', 'ระบบล้มเหลว', a.join(" ").replace(/\[.*?\]/g, '').trim()); };
+})();
+
+// --- 2. DB INITIALIZATION & DASHBOARD BOOT ---
+async function initializeDashboard() {
+    console.log("[SYSTEM] กำลังบูตระบบแผงควบคุม...");
+    const pStart = performance.now();
+    try {
+        const db = await initDB();
+        document.getElementById("nav-db-info").innerHTML = `<i data-lucide="hard-drive" class="w-3 h-3"></i> ${db.name} <span class="opacity-50 ml-1">v${db.version}</span>`; lucide.createIcons();
+        const series = await new Promise(r => db.transaction("series").objectStore("series").getAll().onsuccess = e => r(e.target.result));
+        const chapters = await new Promise(r => db.transaction("chapters").objectStore("chapters").getAll().onsuccess = e => r(e.target.result));
+        
+        // Use .innerHTML instead of .innerText to bypass Blogger Encoding
+        document.getElementById("dash-total-series").innerHTML = series.length;
+        document.getElementById("dash-total-chapters").innerHTML = chapters.length;
+        document.getElementById("dash-locked-items").innerHTML = series.filter(s=>s.isLocked).length + chapters.filter(c=>c.isLocked).length;
+
+        let initialSeries = parseInt(localStorage.getItem('init_series_count')); let initialChapters = parseInt(localStorage.getItem('init_chapters_count'));
+        if(isNaN(initialSeries)) { localStorage.setItem('init_series_count', series.length); initialSeries = series.length; }
+        if(isNaN(initialChapters)) { localStorage.setItem('init_chapters_count', chapters.length); initialChapters = chapters.length; }
+        document.getElementById('stat-growth-series').innerHTML = (series.length - initialSeries >= 0 ? '+' : '') + (series.length - initialSeries) + ' เรื่อง';
+        document.getElementById('stat-growth-chapters').innerHTML = (chapters.length - initialChapters >= 0 ? '+' : '') + (chapters.length - initialChapters) + ' ตอน';
+
+        const breakdown = { Manga: 0, Manhwa: 0, Manhua: 0, Doujin: 0, Novel: 0 }; let totalCategorized = 0;
+        series.forEach(s => { let isCounted = false; if(s.label) { const labels = s.label.map(l => l.toLowerCase()); if(labels.includes('manga')) { breakdown.Manga++; isCounted = true; } else if(labels.includes('manhwa')) { breakdown.Manhwa++; isCounted = true; } else if(labels.includes('manhua')) { breakdown.Manhua++; isCounted = true; } else if(labels.includes('doujin')) { breakdown.Doujin++; isCounted = true; } else if(labels.includes('novel')) { breakdown.Novel++; isCounted = true; } } if(isCounted) totalCategorized++; });
+        ['Manga', 'Manhwa', 'Manhua', 'Doujin', 'Novel'].forEach(cat => { const count = breakdown[cat]; const pct = totalCategorized > 0 ? Math.round((count / totalCategorized) * 100) : 0; const elCount = document.getElementById(`breakdown-${cat.toLowerCase()}-count`); const elBar = document.getElementById(`breakdown-${cat.toLowerCase()}-bar`); if(elCount) elCount.innerHTML = `${count} <span class="text-[9px] text-gray-400">(${pct}%)</span>`; if(elBar) elBar.style.width = `${pct}%`; });
+
+        document.getElementById("stat-active").innerHTML = series.length + chapters.length;
+        if (navigator.storage && navigator.storage.estimate) { const est = await navigator.storage.estimate();
+            let size = "0KB", pct = 5; if(est.usage) { size = est.usage > 1048576 ? (est.usage / 1048576).toFixed(2) + "MB" : (est.usage / 1024).toFixed(1) + "KB"; pct = Math.max(5, (est.usage / est.quota) * 100); } 
+            document.getElementById("stat-storage").innerHTML = size;
+            document.getElementById("storage-bar").style.width = pct + "%"; 
+        }
+        let lsTotalBytes = 0;
+        for(let x in localStorage) { if(localStorage.hasOwnProperty(x)) { lsTotalBytes += ((localStorage[x].length + x.length) * 2); } } 
+        const lsLimitBytes = 5 * 1024 * 1024;
+        const lsPct = Math.min(100, Math.max(5, (lsTotalBytes / lsLimitBytes) * 100));
+        document.getElementById('stat-ls-storage').innerHTML = lsTotalBytes > 1048576 ? (lsTotalBytes / 1048576).toFixed(2) + 'MB' : (lsTotalBytes / 1024).toFixed(1) + 'KB';
+        document.getElementById('ls-storage-bar').style.width = lsPct + '%';
+
+        initLibrary(series, chapters); initHealth(series, chapters);
+        if(typeof populateStudioSeriesDropdown === "function") populateStudioSeriesDropdown(series);
+        document.getElementById("stat-latency").innerHTML = `${Math.round(performance.now() - pStart)}ms`;
+    } catch(e) { console.error("[DB:ERROR] โหลดฐานข้อมูลล้มเหลว:", e.message); }
+}
+
+// --- 3. PREMIUM LIBRARY TABLE WITH BATCH SELECTION ---
+let libData = [];
+let libFilteredData = [];
+let currentPage = 1; const itemsPerPage = 6; let selectedIds = new Set();
+
+function initLibrary(series, chapters) { 
+    const mappedSeries = series.map(s => ({ ...s, _type: 'series', _status: s.status || 'Ongoing' }));
+    const mappedChapters = chapters.map(c => ({ ...c, _type: 'chapter', _status: 'Release' })); 
+    libData = [...mappedSeries, ...mappedChapters].sort((a,b) => b.updated?.localeCompare(a.updated) || 0);
+    handleLibraryFilter(); 
+}
+
+function handleLibraryFilter() { 
+    const query = document.getElementById("lib-search").value.toLowerCase(); const typeFilter = document.getElementById("lib-type-filter").value;
+    libFilteredData = libData.filter(item => { const matchSearch = item.title.toLowerCase().includes(query) || (item.commonTag && item.commonTag.toLowerCase().includes(query)); return matchSearch && (typeFilter === 'all' || item._type === typeFilter); });
+    currentPage = 1; selectedIds.clear(); updateBatchToolbarUI(); renderTablePage(); 
+}
+
+function getStatusBadge(status) { 
+    status = status.toLowerCase();
+    if(status === 'ongoing') return `<span class="text-[10px] font-bold px-2 py-0.5 rounded border bg-teal-50 text-teal-600 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20 uppercase tracking-wider">กำลังแปล</span>`;
+    if(status === 'completed') return `<span class="text-[10px] font-bold px-2 py-0.5 rounded border bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 uppercase tracking-wider">จบแล้ว</span>`;
+    return `<span class="text-[10px] font-bold px-2 py-0.5 rounded border bg-gray-100 text-gray-600 border-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 uppercase tracking-wider">เผยแพร่</span>`;
+}
+
+function renderTablePage() {
+    const tbody = document.getElementById("library-tbody"); const totalItems = libFilteredData.length; const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if(currentPage < 1) currentPage = 1; if(currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+    const startIdx = (currentPage - 1) * itemsPerPage; const endIdx = Math.min(startIdx + itemsPerPage, totalItems); const paginatedItems = libFilteredData.slice(startIdx, endIdx);
+    document.getElementById("pag-start").innerHTML = totalItems === 0 ? 0 : startIdx + 1; document.getElementById("pag-end").innerHTML = endIdx; document.getElementById("pag-total").innerHTML = totalItems;
+    document.getElementById("btn-prev").disabled = currentPage === 1; document.getElementById("btn-next").disabled = currentPage === totalPages || totalPages === 0;
+    
+    const selectAllCheckbox = document.getElementById("checkbox-all");
+    if(selectAllCheckbox) selectAllCheckbox.checked = paginatedItems.length > 0 && paginatedItems.every(item => selectedIds.has(item.id));
+    if (paginatedItems.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-gray-500 italic">ไม่พบข้อมูลที่ตรงกับการค้นหา</td></tr>`; return; }
+    
+    let html = '';
+    paginatedItems.forEach(item => {
+        const isChecked = selectedIds.has(item.id) ? 'checked' : ''; const imgUrl = item.image || DEFAULT_IMG; const defaultImg = `this.src='${DEFAULT_IMG}'`; 
+        const typeBadge = item._type === 'series' ? '<span class="font-mono text-xs font-bold text-gray-900 dark:text-white">เรื่อง</span>' : '<span class="font-mono text-xs font-bold text-gray-500">ตอน</span>'; 
+        const lockIcon = item.isLocked ? 'lock' : 'unlock'; const lockColor = item.isLocked ? 'text-amber-500 hover:text-amber-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'; 
+        const offlineIconColor = item.isOfflineReady ? 'text-teal-500' : 'text-gray-400 dark:text-gray-500 hover:text-blue-500'; 
+        const rowBg = isChecked ? 'bg-teal-50/50 dark:bg-teal-900/10' : 'hover:bg-gray-50 dark:hover:bg-[#151515]';
+       
+        html += `<tr class="transition-colors group ${rowBg}"><td class="px-4 py-3 text-center w-4"><input type="checkbox" onclick="toggleSelectRow('${item.id}')" ${isChecked} class="w-4 h-4 text-teal-600 bg-gray-100 border-gray-300 rounded focus:ring-teal-500 dark:focus:ring-teal-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"></td><td class="px-2 py-3 flex items-center gap-4"><img src="${imgUrl}" onerror="${defaultImg}" class="w-10 h-14 rounded object-cover shadow-sm border border-gray-200 dark:border-gray-700/50 group-hover:scale-105 transition-transform"><div class="flex-1 min-w-0"><h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-teal-500 transition-colors">${item.title}</h4><p class="text-[11px] text-gray-500 dark:text-gray-500 font-medium tracking-wide mt-0.5 truncate">${item.commonTag || 'ไม่ทราบชื่อผู้แต่ง/ป้ายกำกับ'}</p></div></td><td class="px-6 py-3 text-center">${getStatusBadge(item._status)}</td><td class="px-6 py-3 text-center">${typeBadge}</td><td class="px-6 py-3 text-center"><button onclick="toggleItemLock('${item._type}', '${item.id}')" class="p-1.5 transition-colors ${lockColor}"><i data-lucide="${lockIcon}" class="w-4 h-4 mx-auto"></i></button></td><td class="px-6 py-3 text-right"><div class="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-opacity"><button onclick="downloadForOffline('${item._type}', '${item.id}')" title="Offline Cache" class="p-2 ${offlineIconColor} hover:bg-gray-200 dark:hover:bg-gray-800 rounded transition-colors"><i data-lucide="cloud-download" class="w-4 h-4"></i></button><a href="${item.link}" target="_blank" title="ดูหน้าเพจ" class="p-2 text-gray-400 dark:text-gray-500 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors"><i data-lucide="external-link" class="w-4 h-4"></i></a><button onclick="openEditModal('${item._type}', '${item.id}')" title="แก้ไขฐานข้อมูล" class="p-2 text-gray-400 dark:text-gray-500 hover:text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></button><button onclick="deleteItem('${item._type}', '${item.id}', ${item.isLocked})" title="ลบ" class="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`;
+    });
+    tbody.innerHTML = html; lucide.createIcons();
+}
+function changePage(step) { currentPage += step; renderTablePage(); }
+
+// --- BATCH LOGIC ---
+function toggleSelectRow(id) { if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id); updateBatchToolbarUI(); renderTablePage(); }
+function toggleSelectAllVisible(checkbox) { 
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = Math.min(startIdx + itemsPerPage, libFilteredData.length);
+    const paginatedItems = libFilteredData.slice(startIdx, endIdx); 
+    if(checkbox.checked) paginatedItems.forEach(item => selectedIds.add(item.id)); 
+    else paginatedItems.forEach(item => selectedIds.delete(item.id));
+    updateBatchToolbarUI(); renderTablePage();
+}
+function updateBatchToolbarUI() { 
+    const toolbar = document.getElementById("batch-toolbar"); const countText = document.getElementById("batch-count-text");
+    if(selectedIds.size > 0) { toolbar.classList.remove("hidden"); countText.innerHTML = `เลือกแล้ว ${selectedIds.size} รายการ`; } 
+    else { toolbar.classList.add("hidden"); } 
+}
+
+async function executeBatchAction(action) {
+    if(selectedIds.size === 0) return;
+    let actionName = action === 'delete' ? tDec('ลบ') : action === 'protect' ? tDec('ล็อก') : tDec('ปลดล็อก');
+    if(!confirm(tDec(`คุณแน่ใจหรือไม่ว่าต้องการ ${actionName} ทั้ง ${selectedIds.size} รายการ?`))) return;
+    
+    const db = await initDB();
+    const tx = db.transaction(["series", "chapters"], "readwrite"); const sStore = tx.objectStore("series"); const cStore = tx.objectStore("chapters");
+    console.log(`[DB:BATCH] กำลังทำงาน ${actionName} จำนวน ${selectedIds.size} รายการ`);
+    for(let id of selectedIds) { 
+        const item = libData.find(d => d.id === id);
+        if(!item) continue;
+        const store = item._type === 'series' ? sStore : cStore; 
+        if(action === 'delete') { if(!item.isLocked) store.delete(id);
+        } else if(action === 'protect') { store.get(id).onsuccess = (e) => { let d = e.target.result; if(d) { d.isLocked = true; store.put(d); } }; 
+        } else if(action === 'unprotect') { store.get(id).onsuccess = (e) => { let d = e.target.result; if(d) { d.isLocked = false; store.put(d); } }; } 
+    }
+    tx.oncomplete = () => { selectedIds.clear(); updateBatchToolbarUI(); initializeDashboard(); };
+}
+
+// --- CORE SYSTEM ACTIONS ---
+async function toggleItemLock(type, id) { 
+    const storeName = type === 'series' ? 'series' : 'chapters'; 
+    const db = await initDB(); const tx = db.transaction(storeName, "readwrite"); const store = tx.objectStore(storeName);
+    store.get(id).onsuccess = (e) => { let d = e.target.result; if(d) { d.isLocked = !d.isLocked; store.put(d); }};
+    tx.oncomplete = () => { console.log(`[DB:LOCK] สลับสถานะสำหรับ ${id}`); initializeDashboard(); };
+}
+
+async function deleteItem(type, id, isLocked) { 
+    if(isLocked) { alert(tDec("ข้อมูลถูกป้องกันไว้ กรุณาปลดล็อกก่อนลบ")); return; } 
+    if(confirm(tDec("ต้องการลบข้อมูลนี้ถาวรหรือไม่?"))) { 
+        const storeName = type === 'series' ? 'series' : 'chapters';
+        const db = await initDB(); db.transaction(storeName, "readwrite").objectStore(storeName).delete(id).onsuccess = () => { console.log(`[DB:DELETE] ลบรายการ ${id} แล้ว`); initializeDashboard(); };
+    } 
+}
+
+function forceSync() { 
+    console.log("[SYNC] กำลังเริ่มซิงค์อัจฉริยะ..."); 
+    document.getElementById("sync-icon").classList.add("animate-spin"); 
+    if(typeof startSync === 'function') startSync(1, false);
+    else setTimeout(() => { document.getElementById("sync-icon").classList.remove("animate-spin"); initializeDashboard(); }, 1000); 
+}
+
+function startFullSync() { 
+    Swal.fire({ title: tDec('ซิงค์ฐานข้อมูลเต็มรูปแบบ'), html: tDec("การกระทำนี้จะละทิ้งแคชและดึงข้อมูลใหม่ทั้งหมดจาก Blogger อาจจะใช้เวลาสักพัก"), icon: 'warning', showCancelButton: true, confirmButtonText: tDec('ตกลง, สร้างฐานข้อมูลใหม่'), cancelButtonText: tDec('ยกเลิก') }).then((result) => { if (result.isConfirmed) { console.log("[SYNC] เริ่มการสร้างข้อมูลใหม่ทั้งหมด..."); if(typeof startSync === 'function') { document.getElementById("sync-icon").classList.add("animate-spin"); startSync(1, true); } else console.error("[SYNC:ERROR] ไม่พบ Sync Engine!"); } });
+}
+
+function nukeDatabase() { 
+    Swal.fire({ title: tDec('ล้างฐานข้อมูล?'), html: tDec("คำเตือน: นี่จะเป็นการล้างข้อมูลทั้งหมดใน IndexedDB ของคุณ ต้องการดำเนินการหรือไม่?"), icon: 'error', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: tDec('ตกลง, ล้างข้อมูลทั้งหมด'), cancelButtonText: tDec('ยกเลิก') }).then((result) => { if (result.isConfirmed) { console.log("[DB:NUKE] กำลังล้างข้อมูลระบบ..."); const req = indexedDB.deleteDatabase("MangaDB_v6"); req.onsuccess = () => { console.log("[DB:NUKE] ล้างข้อมูลสำเร็จ."); localStorage.removeItem('db_last_server_update'); localStorage.removeItem('db_total_posts'); Swal.fire({title: tDec('ล้างข้อมูลสำเร็จ!'), html: tDec('รีเซ็ตฐานข้อมูลแล้ว.'), icon: 'success', confirmButtonText: tDec('ตกลง')}).then(() => location.reload()); }; } });
+}
+
+async function exportDatabase() { 
+    console.log("[DB:EXPORT] กำลังสร้างไฟล์สำรอง XML..."); 
+    const db = await initDB();
+    const series = await new Promise(r => db.transaction("series").objectStore("series").getAll().onsuccess = e => r(e.target.result));
+    const chapters = await new Promise(r => db.transaction("chapters").objectStore("chapters").getAll().onsuccess = e => r(e.target.result));
+    let xml = `<?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom'><title type='text'>MangaDB Backup</title><generator>MangaDB System</generator>`;
+    const escapeXML = (str) => (str || "").replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;'); 
+    [...series, ...chapters].forEach(item => { 
+        let isSeries = item._type === 'series'; 
+        let categories = item.label ? item.label.map(l => `<category scheme="http://www.blogger.com/atom/ns#" term="${escapeXML(l)}"/>`).join('') : ''; 
+        let tags = `<category scheme="http://www.blogger.com/atom/ns#" term="${isSeries ? 'Series' : 'Chapter'}"/>` + categories; 
+        let content = item.offlineContent ? item.offlineContent : `<img src="${item.image}"/><br/>MangaDB System Backup Record: ${item.title}`; 
+        xml += `<entry><category scheme="http://schemas.google.com/g/2005#kind" term="http://schemas.google.com/blogger/2008/kind#post"/>${tags}<title type='text'>${escapeXML(item.title)}</title><content type='html'>${escapeXML(content)}</content><published>${item.updated || new Date().toISOString()}</published></entry>`; 
+    }); 
+    xml += `</feed>`;
+    
+    // เติม BOM เพื่อแก้ปัญหาภาษาไทยให้ Blogger Importer อ่านออก
+    const blob = new Blob(["\ufeff", xml], { type: 'application/xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url;
+    a.download = `MangaDB_Backup_${Date.now()}.xml`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// --- 7. HEALTH LOGIC (RESOLVE ORPHANS) ---
+let fullHealthData = [];
+let currentHealthPage = 1; const healthItemsPerPage = 4;
+let globalOrphanIds = [];
+
+function initHealth(series, chapters) { 
+    const seriesTags = new Set(series.map(s => s.commonTag).filter(t => t));
+    fullHealthData = chapters.filter(ch => !seriesTags.has(ch.commonTag) && !ch.isLocked); 
+    globalOrphanIds = fullHealthData.map(o => o.id); 
+    const badge = document.getElementById("badge-health"); const purgeBtn = document.getElementById("btn-purge-all");
+    const resolveAllBtn = document.getElementById("btn-resolve-all"); const pagWrapper = document.getElementById("health-pagination-wrapper"); 
+    
+    if (fullHealthData.length === 0) { 
+        document.getElementById("health-results-body").innerHTML = `<tr><td colspan="3" class="px-6 py-10 text-center"><div class="flex flex-col items-center justify-center text-teal-600 dark:text-teal-500"><i data-lucide="check-circle-2" class="w-10 h-10 mb-3"></i><p class="font-bold text-sm">ฐานข้อมูลปกติ</p><p class="text-xs text-gray-500 dark:text-gray-400 mt-1">ไม่พบตอนที่ไม่มีเรื่องหลักอ้างอิง</p></div></td></tr>`;
+        badge.classList.add('hidden'); purgeBtn.classList.add('hidden'); if(resolveAllBtn) resolveAllBtn.classList.add('hidden'); pagWrapper.classList.add('hidden'); lucide.createIcons(); return; 
+    } 
+    badge.classList.remove('hidden'); purgeBtn.classList.remove('hidden'); if(resolveAllBtn) resolveAllBtn.classList.remove('hidden'); pagWrapper.classList.remove('hidden'); 
+    currentHealthPage = 1;
+    renderHealthPage(); 
+}
+
+function renderHealthPage() { 
+    const tbody = document.getElementById("health-results-body"); const totalItems = fullHealthData.length;
+    const totalPages = Math.ceil(totalItems / healthItemsPerPage); 
+    if(currentHealthPage < 1) currentHealthPage = 1;
+    if(currentHealthPage > totalPages && totalPages > 0) currentHealthPage = totalPages; 
+    const startIdx = (currentHealthPage - 1) * healthItemsPerPage;
+    const endIdx = Math.min(startIdx + healthItemsPerPage, totalItems); const paginatedItems = fullHealthData.slice(startIdx, endIdx); 
+    
+    document.getElementById("h-pag-start").innerHTML = totalItems === 0 ? 0 : startIdx + 1; 
+    document.getElementById("h-pag-end").innerHTML = endIdx; 
+    document.getElementById("h-pag-total").innerHTML = totalItems; 
+    document.getElementById("h-btn-prev").disabled = currentHealthPage === 1;
+    document.getElementById("h-btn-next").disabled = currentHealthPage === totalPages || totalPages === 0; 
+    
+    let html = '';
+    paginatedItems.forEach(o => { 
+        html += `<tr class="hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors">
+            <td class="px-6 py-3 min-w-[200px]"><p class="font-bold text-gray-900 dark:text-gray-200 truncate">${o.title}</p><p class="text-[10px] text-gray-500 mt-0.5 font-mono">ID: ${o.id}</p></td>
+            <td class="px-6 py-3"><span class="bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800/50 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex items-center w-max gap-1"><i data-lucide="link-2-off" class="w-3 h-3"></i> ไม่พบเรื่องหลัก</span><p class="text-[10px] text-gray-400 mt-1 truncate max-w-[150px]">ป้ายกำกับปัจจุบัน: "${o.commonTag || 'ไม่มี'}"</p></td>
+            <td class="px-6 py-3 text-right"><button onclick="resolveOrphan('${o.id}')" class="text-[10px] font-bold uppercase tracking-wider text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 px-3 py-1.5 rounded-md hover:bg-teal-50 dark:hover:bg-teal-900/20 border border-teal-200 dark:border-teal-800/50 transition-colors">แก้ไขป้ายกำกับ</button></td>
+        </tr>`;
+    }); 
+    tbody.innerHTML = html; lucide.createIcons(); 
+}
+function changeHealthPage(step) { currentHealthPage += step; renderHealthPage(); }
+
+async function resolveOrphan(chapterId) {
+    const db = await initDB();
+    const series = await new Promise(r => db.transaction("series").objectStore("series").getAll().onsuccess = e => r(e.target.result));
+    let options = {};
+    series.forEach(s => { options[s.title] = s.title; });
+    const { value: selectedSeries } = await Swal.fire({ title: tDec('ซ่อมแซมตอนที่ไม่มีเรื่องหลัก'), input: 'select', inputOptions: options, inputPlaceholder: tDec('-- เลือกเรื่องมังงะ --'), showCancelButton: true, confirmButtonText: tDec('ตกลง'), cancelButtonText: tDec('ยกเลิก'), background: document.documentElement.classList.contains('dark') ? '#111111' : '#ffffff', color: document.documentElement.classList.contains('dark') ? '#ffffff' : '#000000' });
+    if (selectedSeries) {
+        const tx = db.transaction("chapters", "readwrite"); const store = tx.objectStore("chapters");
+        store.get(chapterId).onsuccess = (e) => { let d = e.target.result; if(d) { console.log(`[DB:RESOLVE] เชื่อมโยงตอน ${chapterId} เข้ากับ ${selectedSeries}`); d.commonTag = selectedSeries;
+        d.isLocked = true; store.put(d); } };
+        tx.oncomplete = () => { Swal.fire({title: tDec('สำเร็จ!'), html: tDec('เชื่อมโยงตอนและล็อกการเปลี่ยนแปลงเรียบร้อยแล้ว.'), icon: 'success', confirmButtonText: tDec('ตกลง')}); initializeDashboard(); };
+    }
+}
+
+// AUTO RESOLVE ALL ORPHANS
+async function resolveAllOrphans() {
+    if(globalOrphanIds.length === 0) return;
+    console.log("[DB:RESOLVE] เริ่มการแก้ไขตอนอัตโนมัติ...");
+    const db = await initDB();
+    const series = await new Promise(r => db.transaction("series").objectStore("series").getAll().onsuccess = e => r(e.target.result));
+    const tx = db.transaction("chapters", "readwrite");
+    const store = tx.objectStore("chapters");
+    
+    let resolvedCount = 0;
+    for(let id of globalOrphanIds) {
+        const chapter = await new Promise(r => store.get(id).onsuccess = e => r(e.target.result));
+        if(!chapter) continue;
+        
+        let bestMatch = null;
+        const cTag = (chapter.commonTag || "").toLowerCase().trim();
+        const cTitle = (chapter.title || "").toLowerCase().trim();
+        bestMatch = series.find(s => {
+            const sTitle = s.title.toLowerCase();
+            const sTag = (s.commonTag || "").toLowerCase();
+            return (cTag.length > 3 && (sTitle.includes(cTag) || sTag.includes(cTag))) || (cTitle.includes(sTitle) || cTitle.includes(sTag));
+        });
+        if(bestMatch) {
+            console.log(`[DB:RESOLVE] จับคู่อัตโนมัติ: ${chapter.title} --> ${bestMatch.title}`);
+            chapter.commonTag = bestMatch.commonTag || bestMatch.title;
+            chapter.isLocked = true;
+            store.put(chapter);
+            resolvedCount++;
+        }
+    }
+    
+    tx.oncomplete = () => {
+        if(resolvedCount > 0) {
+            Swal.fire({title: tDec('การแก้ไขอัตโนมัติสำเร็จ'), html: tDec(`จับคู่ตอนที่ไร้เรื่องหลักได้สำเร็จ ${resolvedCount} จาก ${globalOrphanIds.length} ตอน`), icon: 'success', confirmButtonText: tDec('ตกลง')});
+        } else {
+            Swal.fire({title: tDec('ไม่พบเรื่องที่จับคู่ได้'), html: tDec('ไม่สามารถหาเรื่องหลักที่ตรงกับตอนที่เหลือได้ กรุณาแก้ไขด้วยตนเองหรือลบข้อมูลทิ้ง'), icon: 'info', confirmButtonText: tDec('ตกลง')});
+        }
+        initializeDashboard();
+    }
+}
+
+async function purgeAllOrphans() { 
+    if(globalOrphanIds.length === 0 || !confirm(tDec(`ต้องการลบตอนที่ไร้เรื่องหลัก ${globalOrphanIds.length} ตอนอย่างถาวรหรือไม่?`))) return;
+    console.log("[DB:PURGE] กำลังลบตอนที่ไม่มีเรื่องหลักทั้งหมด"); 
+    const db = await initDB(); const tx = db.transaction("chapters", "readwrite"); const store = tx.objectStore("chapters");
+    globalOrphanIds.forEach(id => store.delete(id));
+    tx.oncomplete = () => { initializeDashboard(); }; 
+}
+
+document.addEventListener("DOMContentLoaded", () => { initializeDashboard(); });
+/*]]>*/
+</script>
+
+<script id="script-modals">
+/*<![CDATA[*/
+// DB EDITOR MODAL
+function openEditModal(type, id) {
+    const dataList = type === 'series' ? libData.filter(d => d._type === 'series') : libData.filter(d => d._type === 'chapter'); const data = dataList.find(d => d.id === id);
+    if (!data) return;
+    document.getElementById('edit-id').value = data.id; document.getElementById('edit-type').value = type; document.getElementById('edit-title').value = data.title || ''; document.getElementById('edit-image').value = data.image || '';
+    document.getElementById('edit-tag').value = data.commonTag || ''; document.getElementById('edit-status').value = data.status || data._status || 'Ongoing';
+    document.getElementById('modal-preview-img').src = data.image || 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgcpJA-XCwTra_3S53QFkfxXEKsI1FOZtpBB-vUksTY1qod7mc9V-XizRUu_dJA6KolOwCSUhpQgJCCouTzs-sap-7MhnNGrwZA041TxWTq2RAVFIrweNNeHFjIRUwKF-OpZGijYnajmNVG0zz3ZaOfTWD2XJ4pBv81txeBfTzFpmivnnHzXjlxyvLvf-9u/h324-w200-c/0.webp';
+    document.getElementById('modal-preview-type').innerHTML = type === 'series' ? 'เรื่อง' : 'ตอน';
+    document.getElementById('modal-preview-type').className = `px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-white rounded backdrop-blur shadow-sm ${type==='series'?'bg-teal-500':'bg-indigo-500'}`;
+    document.getElementById('crud-modal').classList.add('active');
+}
+function closeModal() { document.getElementById('crud-modal').classList.remove('active'); }
+async function saveEditedData(e) {
+    e.preventDefault(); const type = document.getElementById('edit-type').value;
+    const storeName = type === 'series' ? 'series' : 'chapters'; const id = document.getElementById('edit-id').value;
+    const db = await initDB();
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+    store.get(id).onsuccess = (ev) => { 
+        let existing = ev.target.result;
+        if (existing) { 
+            existing.title = document.getElementById('edit-title').value;
+            existing.image = document.getElementById('edit-image').value; existing.commonTag = document.getElementById('edit-tag').value; existing.status = document.getElementById('edit-status').value; existing.isLocked = true; store.put(existing); 
+        } 
+    };
+    tx.oncomplete = () => { closeModal(); initializeDashboard(); };
+}
+
+// CREATOR STUDIO MODAL
+function openStudioModal(defaultTab = 'series') { document.getElementById('studio-modal').classList.add('active'); switchStudioTab(defaultTab); }
+function closeStudioModal() { document.getElementById('studio-modal').classList.remove('active'); }
+function switchStudioTab(tab) {
+    document.getElementById('studio-tab-series').classList.remove('bg-teal-600', 'text-white'); document.getElementById('studio-tab-series').classList.add('text-gray-500', 'hover:bg-gray-100', 'dark:hover:bg-gray-800');
+    document.getElementById('studio-tab-chapter').classList.remove('bg-teal-600', 'text-white'); document.getElementById('studio-tab-chapter').classList.add('text-gray-500', 'hover:bg-gray-100', 'dark:hover:bg-gray-800');
+    if(tab === 'series') { 
+        document.getElementById('studio-tab-series').classList.add('bg-teal-600', 'text-white'); document.getElementById('studio-tab-series').classList.remove('text-gray-500', 'hover:bg-gray-100', 'dark:hover:bg-gray-800'); 
+        document.getElementById('studio-form-series').classList.remove('hidden'); document.getElementById('studio-form-chapter').classList.add('hidden');
+    } else { 
+        document.getElementById('studio-tab-chapter').classList.add('bg-teal-600', 'text-white'); document.getElementById('studio-tab-chapter').classList.remove('text-gray-500', 'hover:bg-gray-100', 'dark:hover:bg-gray-800'); 
+        document.getElementById('studio-form-chapter').classList.remove('hidden'); document.getElementById('studio-form-series').classList.add('hidden');
+    }
+}
+
+// XML GENERATOR MODAL
+function openGeneratorModal() { 
+    document.getElementById('generator-modal').classList.add('active');
+    if(typeof renderHistory === 'function') renderHistory(); 
+}
+function closeGeneratorModal() { document.getElementById('generator-modal').classList.remove('active'); }
+/*]]>*/
+</script>
+
+<script id="script-studio">
+/*<![CDATA[*/
+function populateStudioSeriesDropdown(seriesData) {
+    const select = document.getElementById('studio-chapter-parent');
+    if(!select) return;
+    let options = '<option value="">-- เลือกเรื่องมังงะหลัก --</option>';
+    seriesData.forEach(s => { options += `<option value="${s.title}">${s.title} (${s.commonTag})</option>`; });
+    select.innerHTML = options;
+}
+
+async function submitMockupSeries(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-series');
+    btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> กำลังส่งข้อมูลไปยัง Blogger API...`; btn.disabled = true;
+    await new Promise(r => setTimeout(r, 1500));
+    Swal.fire({ title: tDec('สำเร็จ!'), html: tDec('Mockup: เพิ่มเรื่องใหม่ผ่าน Blogger API v3 เรียบร้อยแล้ว'), icon: 'success', confirmButtonColor: '#0d9488', confirmButtonText: tDec('ตกลง'), background: document.documentElement.classList.contains('dark') ? '#111111' : '#ffffff', color: document.documentElement.classList.contains('dark') ? '#ffffff' : '#000000' });
+    btn.innerHTML = `<i data-lucide="cloud-upload" class="w-4 h-4 mr-2"></i> เผยแพร่เรื่องนี้`; btn.disabled = false; e.target.reset(); document.getElementById('studio-series-preview').src = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgcpJA-XCwTra_3S53QFkfxXEKsI1FOZtpBB-vUksTY1qod7mc9V-XizRUu_dJA6KolOwCSUhpQgJCCouTzs-sap-7MhnNGrwZA041TxWTq2RAVFIrweNNeHFjIRUwKF-OpZGijYnajmNVG0zz3ZaOfTWD2XJ4pBv81txeBfTzFpmivnnHzXjlxyvLvf-9u/h324-w200-c/0.webp';
+}
+
+async function submitMockupChapter(e) {
+    e.preventDefault(); const btn = document.getElementById('btn-submit-chapter');
+    btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> กำลังประมวลผลรูปภาพ...`; btn.disabled = true;
+    await new Promise(r => setTimeout(r, 2000));
+    Swal.fire({ title: tDec('อัพโหลดสำเร็จ!'), html: tDec('Mockup: นำภาพมารวมและโพสต์ตอนใหม่เรียบร้อยแล้ว'), icon: 'success', confirmButtonColor: '#0d9488', confirmButtonText: tDec('ตกลง'), background: document.documentElement.classList.contains('dark') ? '#111111' : '#ffffff', color: document.documentElement.classList.contains('dark') ? '#ffffff' : '#000000' });
+    btn.innerHTML = `<i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> เผยแพร่ตอนนี้`; btn.disabled = false; e.target.reset();
+}
+/*]]>*/
+</script>
+
+<script id="script-xml-generator">
+/*<![CDATA[*/
+const BLOG_ID = "1234567890123456789";
+const POST_LIMIT = 100;
+const MAL_API_URL = "https://api.jikan.moe/v4/manga";
+let malTimer; let selectedManga = null;
+
+// ==========================================
+// AUTO TRANSLATE HELPER (Google Translate API)
+// ==========================================
+async function translateToThai(text) {
+    if (!text) return "";
+    try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=th&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const json = await res.json();
+        // ประกอบข้อความที่แปลเสร็จแล้ว
+        return json[0].map(item => item[0]).join('');
+    } catch (e) {
+        console.error("Translation Error:", e);
+        return text;
+        // ถ้าแปลล้มเหลว ให้คืนค่าภาษาดั้งเดิม
+    }
+}
+
+// Search Engine
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById('search-import');
+    if(searchInput) { 
+        searchInput.addEventListener('input', (e) => { 
+            clearTimeout(malTimer); const val = e.target.value.trim(); 
+            if (val.length < 3) return; 
+            malTimer = setTimeout(() => malSearch(val), 500); 
+        }); 
+    }
+});
+
+async function malSearch(search) {
+    try { 
+        const resp = await fetch(`${MAL_API_URL}?q=${encodeURIComponent(search)}&limit=5`);
+        const json = await resp.json(); 
+        displayResults(json.data || []); 
+    } catch (e) { 
+        console.error(e);
+    }
+}
+
+function displayResults(list) {
+    const res = document.getElementById('search-results'); res.innerHTML = "";
+    if (list.length === 0) {
+        res.innerHTML = '<div class="p-3 text-center text-gray-500 text-sm">ไม่พบข้อมูลมังงะเรื่องนี้บน MyAnimeList</div>';
+    } else {
+        list.forEach(m => {
+            const title = (m.title_english || m.title).replace(/,/g, ''); 
+            const div = document.createElement('div');
+            div.className = "search-result p-3 flex items-center gap-3 cursor-pointer border-b border-gray-100 dark:border-gray-800 transition-colors hover:bg-teal-50 dark:hover:bg-teal-900/10";
+            const imageUrl = m.images && m.images.jpg ? m.images.jpg.large_image_url : DEFAULT_IMG;
+        
+            div.innerHTML = `<img src="${imageUrl}" class="w-8 h-10 object-cover rounded shadow"><div class="flex-1 overflow-hidden"><div class="font-bold truncate text-sm text-gray-900 dark:text-white">${title}</div><div class="text-[9px] text-teal-600 dark:text-teal-400 font-mono tracking-widest uppercase">${m.status}</div></div>`;
+            div.onclick = () => selectManga(m); res.appendChild(div);
+        });
+    }
+    res.classList.remove('hidden');
+}
+
+async function selectManga(m, start = 1, end = null) {
+    const title = (m.title_english || m.title).replace(/,/g, '');
+    const imageUrl = m.images && m.images.jpg ? m.images.jpg.large_image_url : DEFAULT_IMG;
+    const authorNames = m.authors && m.authors.length > 0 ? m.authors.map(a => a.name).join(', ') : "ไม่ทราบข้อมูล";
+    
+    // ตั้งค่าเบื้องต้น + แสดงสถานะกำลังแปล
+    document.getElementById('m-title').value = title; 
+    document.getElementById('m-start').value = start;
+    document.getElementById('m-end').value = end || m.chapters || 0; 
+    
+    // เคลียร์กล่องเรื่องย่อและขึ้นสถานะ
+    const descBox = document.getElementById('m-desc');
+    if(descBox) descBox.value = "กำลังแปลภาษา...";
+    document.getElementById('search-results').classList.add('hidden');
+    document.getElementById('prev-img').src = imageUrl; 
+    document.getElementById('prev-title').innerHTML = title; 
+    document.getElementById('prev-meta').innerHTML = `สถานะ: ${m.status || "Unknown"}`;
+    document.getElementById('prev-desc').innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline-block text-teal-500 mr-1"></i> กำลังแปลเรื่องย่อเป็นภาษาไทย...`;
+    lucide.createIcons();
+
+    // เริ่มแปลภาษา (ตัดข้อความขยะของ MAL ออกก่อนเพื่อให้แปลดีขึ้น)
+    let rawSynopsis = m.synopsis || "ไม่มีเรื่องย่อสำหรับเรื่องนี้";
+    rawSynopsis = rawSynopsis.replace(/\[Written by MAL Rewrite\]/gi, '').replace(/\(Source:.*?\)/gi, '').trim();
+    let thaiSynopsis = await translateToThai(rawSynopsis);
+
+    selectedManga = { 
+        id: m.mal_id, 
+        title: title, 
+        authors: authorNames, 
+        artists: authorNames, 
+        romaji: m.title_japanese || "N/A", 
+        english: m.title_english || "N/A", 
+        native: m.title_japanese || "N/A", 
+        cover: imageUrl, 
+        desc: thaiSynopsis,  // ใช้เนื้อหาที่แปลไทยแล้วบันทึกลงตัวแปร
+        status: m.status || "Unknown", 
+        type: m.type || "Manga", 
+        genres: m.genres ? m.genres.map(g => g.name) : [] 
+    };
+
+    // อัปเดต UI หลังจากแปลเสร็จ
+    if(descBox) descBox.value = selectedManga.desc;
+    document.getElementById('prev-desc').innerHTML = selectedManga.desc.replace(/<[^>]*>/g, "").substring(0, 150) + "...";
+    const btnDl = document.getElementById('btn-dl-series'); btnDl.disabled = false; btnDl.classList.remove('opacity-50', 'cursor-not-allowed');
+    saveToHistory(selectedManga.id, title, selectedManga.cover, start, document.getElementById('m-end').value); generateChapterInputs();
+}
+
+// History
+function saveToHistory(id, title, cover, start, end) { 
+    let history = JSON.parse(localStorage.getItem('manga_history') || '[]');
+    history = history.filter(item => item.id !== id); history.unshift({ id, title, cover, start, end, time: Date.now() });
+    if (history.length > 15) history.pop(); localStorage.setItem('manga_history', JSON.stringify(history)); renderHistory(); 
+}
+function renderHistory() {
+    const list = document.getElementById('history-list');
+    const history = JSON.parse(localStorage.getItem('manga_history') || '[]');
+    if (history.length === 0) { list.innerHTML = `<div class="text-center py-10 text-gray-400 text-[10px] font-mono uppercase">ไม่มีประวัติการทำงาน</div>`; return; }
+    list.innerHTML = history.map(item => `<div class="history-card bg-gray-50 dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-700 rounded-xl p-3 flex items-center gap-3 transition-colors relative group"><img src="${item.cover}" class="w-10 h-14 object-cover rounded shadow-sm cursor-pointer" onclick="resumeProject(${item.id})"><div class="flex-1 min-w-0 cursor-pointer" onclick="resumeProject(${item.id})"><div class="font-bold text-xs text-gray-900 dark:text-gray-100 truncate leading-tight">${item.title}</div><div class="text-[10px] text-amber-600 dark:text-amber-500 font-mono mt-1">ตอนที่: ${item.start} - ${item.end}</div></div><button onclick="deleteHistory(${item.id})" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1"><i data-lucide="trash" class="w-4 h-4"></i></button></div>`).join('');
+    lucide.createIcons();
+}
+async function resumeProject(id) { 
+    const history = JSON.parse(localStorage.getItem('manga_history') || '[]');
+    const item = history.find(h => h.id === id);
+    if (item) { 
+        try { 
+            const resp = await fetch(`${MAL_API_URL}/${id}`);
+            const json = await resp.json(); 
+            selectManga(json.data, item.start, item.end); 
+        } catch (e) { 
+            selectManga(item, item.start, item.end); // fallback to cached data layout roughly
+        } 
+    } 
+}
+function deleteHistory(id) { 
+    let history = JSON.parse(localStorage.getItem('manga_history') || '[]');
+    history = history.filter(item => item.id !== id); localStorage.setItem('manga_history', JSON.stringify(history));
+    renderHistory();
+}
+
+// Crypto Core
+async function getPasswordKey(password, salt) { const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+async function encryptText(text, password) { const enc = new TextEncoder(); const data = enc.encode(text); const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12)); const key = await getPasswordKey(password, salt);
+    const encryptedBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, data); const encryptedArray = new Uint8Array(encryptedBuffer);
+    const combined = new Uint8Array(salt.length + iv.length + encryptedArray.length); combined.set(salt, 0); combined.set(iv, salt.length); combined.set(encryptedArray, salt.length + iv.length);
+    return btoa(Array.from(combined, byte => String.fromCharCode(byte)).join("")); 
+}
+
+// Chapter Builder
+document.addEventListener("DOMContentLoaded", () => { const mStart = document.getElementById('m-start'); const mEnd = document.getElementById('m-end'); if(mStart) mStart.addEventListener('input', () => { updateHistoryRange(); generateChapterInputs(); }); if(mEnd) mEnd.addEventListener('input', () => { updateHistoryRange(); generateChapterInputs(); }); });
+function updateHistoryRange() { if (!selectedManga) return; saveToHistory(selectedManga.id, selectedManga.title, selectedManga.cover, document.getElementById('m-start').value, document.getElementById('m-end').value); }
+
+// แทนที่ฟังก์ชัน generateChapterInputs() เดิมทั้งหมด
+function generateChapterInputs() {
+    const customInput = document.getElementById('m-custom-chapters').value.trim();
+    let chapterList = [];
+
+    // เช็คว่าผู้ใช้กรอกแบบ Custom หรือไม่
+    if (customInput) {
+        // แยกด้วยลูกน้ำ และลบช่องว่าง
+        chapterList = customInput.split(',').map(item => item.trim()).filter(item => item !== "");
+    } else {
+        // ใช้ Start - End แบบเดิม
+        const start = parseInt(document.getElementById('m-start').value) || 1;
+        const end = parseInt(document.getElementById('m-end').value) || 0;
+        if (end < start) return;
+        for (let i = start; i <= end; i++) {
+            chapterList.push(i.toString());
+        }
+    }
+
+    const container = document.getElementById('chapter-list-container');
+    if (!container || chapterList.length === 0) return;
+
+    // บันทึกข้อมูลเดิม
+    const oldData = {}, oldUrls = {};
+    container.querySelectorAll('textarea').forEach(t => oldData[t.dataset.id] = t.value);
+    container.querySelectorAll('input[type="url"]').forEach(t => oldUrls[t.dataset.id] = t.value);
+    container.innerHTML = '';
+    
+    // วนลูปตามรายชื่อตอนที่ได้มา
+    chapterList.forEach(chapterNum => {
+        const div = document.createElement('div');
+        div.className = 'bg-gray-50 dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 rounded-xl p-4 group';
+        // โครงสร้าง HTML ด้านในใช้แบบเดิมของคุณได้เลย
+        // แค่เปลี่ยนตัวแปร i เป็น chapterNum ในการอ้างอิง ID ต่างๆ
+        div.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest">เนื้อหา ตอนที่ ${chapterNum}</span>
+            </div>
+            <div class="flex gap-2 mb-1.5">
+                <input type="url" id="fetch-url-${chapterNum}" data-id="${chapterNum}" value="${oldUrls[chapterNum] || ''}"
+                    placeholder="URL ตอนที่ ${chapterNum} — กด 'ดึงรูป' เพื่อดึงอัตโนมัติ"
+                    class="flex-1 bg-white dark:bg-[#151515] border border-dashed border-blue-300 dark:border-blue-800/60 text-gray-700 dark:text-gray-300 rounded-lg px-2.5 py-1.5 text-[11px] font-mono outline-none focus:border-blue-500 transition-colors" />
+                <button id="fetch-btn-${chapterNum}" onclick="autoFetchChapter('${chapterNum}')"
+                    class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap">
+                    <i data-lucide="download" class="w-3 h-3"></i> ดึงรูป
+                </button>
+            </div>
+            <div id="fetch-status-${chapterNum}" class="text-[10px] mb-1.5 min-h-[16px]"></div>
+            <textarea id="cap-val-${chapterNum}" data-id="${chapterNum}"
+                class="w-full h-24 bg-white dark:bg-[#151515] border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 outline-none font-mono text-xs text-gray-800 dark:text-gray-300 focus:border-teal-500 transition-colors resize-none custom-scrollbar"
+                placeholder="วาง HTML ที่นี่ หรือกด 'ดึงรูป' ด้านบน">${oldData[chapterNum] || ''}</textarea>
+        `;
+        container.appendChild(div);
+    });
+    lucide.createIcons();
+    // ต้องแก้ renderPackButtons ให้รองรับ array ด้วยนะครับหากจะใช้ฟีเจอร์ Pack
+}
+async function lockChapter(index) {
+    const password = document.getElementById('vault-password').value;
+    const textarea = document.getElementById(`cap-val-${index}`); const rawHtml = textarea.value;
+    if (!password) { Swal.fire({title: tDec('เกิดข้อผิดพลาด'), html: tDec('กรุณาตั้งรหัสผ่าน Vault ด้านบนก่อน!'), icon: 'error', confirmButtonText: tDec('ตกลง')}); return; } 
+    if (!rawHtml.trim()) { Swal.fire({title: tDec('คำเตือน'), html: tDec('คุณยังไม่ได้ใส่เนื้อหาในตอนนี้!'), icon: 'warning', confirmButtonText: tDec('ตกลง')}); return; } 
+    if (textarea.classList.contains('locked-area')) { Swal.fire({title: tDec('รับทราบ'), html: tDec('ตอนนี้ถูกเข้ารหัสและล็อกไว้แล้ว!'), icon: 'info', confirmButtonText: tDec('ตกลง')}); return; }
+    
+    const parser = new DOMParser(); const doc = parser.parseFromString(rawHtml, 'text/html');
+    const images = doc.querySelectorAll('img');
+    const urls = []; images.forEach(img => { const url = img.getAttribute('data-src') || img.getAttribute('src'); if (url && !url.includes('loading.png')) urls.push(url); });
+    if (urls.length === 0) { Swal.fire({title: tDec('เกิดข้อผิดพลาด'), html: tDec('ไม่พบลิงก์รูปภาพให้เข้ารหัส!'), icon: 'error', confirmButtonText: tDec('ตกลง')}); return; }
+    
+    try { 
+        const encrypted = await encryptText(JSON.stringify(urls), password);
+        textarea.value = encrypted; textarea.classList.add('locked-area'); textarea.readOnly = true;
+        const iconDiv = document.getElementById(`lock-icon-${index}`); iconDiv.setAttribute('data-lucide', 'lock'); iconDiv.classList.replace('text-gray-400', 'text-indigo-500'); lucide.createIcons();
+    } catch (e) { 
+        Swal.fire({title: tDec('เกิดข้อผิดพลาด'), html: tDec('การเข้ารหัสล้มเหลว!'), icon: 'error', confirmButtonText: tDec('ตกลง')});
+        console.error(e);
+    }
+}
+async function lockAllChapters() { 
+    let startParsed = parseInt(document.getElementById('m-start').value);
+    const start = isNaN(startParsed) ? 1 : startParsed;
+    
+    let endParsed = parseInt(document.getElementById('m-end').value);
+    const end = isNaN(endParsed) ? 0 : endParsed;
+    for (let i = start; i <= end; i++) await lockChapter(i);
+}
+
+// XML Builder
+function cleanHTML(rawHTML, chapterTitle) {
+    if (!rawHTML.trim()) return ""; if (!rawHTML.includes('<img')) return rawHTML;
+    const parser = new DOMParser(); const doc = parser.parseFromString(rawHTML, 'text/html'); const imgs = doc.querySelectorAll('img'); const targetRes = document.getElementById('img-res').value;
+    let output = "";
+    imgs.forEach((img, idx) => { let src = img.getAttribute('src') || ""; if (targetRes !== 'original') src = src.replace(/\/(s|w|h)\d+\//g, `/${targetRes}/`); const dataW = img.getAttribute('data-original-width'); const dataH = img.getAttribute('data-original-height'); let tag = `<img alt="${chapterTitle} - หน้า ${idx + 1}" src="${src}" loading="lazy"`; if (dataW && dataH) tag += ` width="${dataW}" height="${dataH}"`; tag += `/>`; output += tag + "\n"; });
+    return output.trim();
+}
+function buildVerifiedBloggerXML(dataArray, filename, part) {
+    const isDraft = document.getElementById('post-status').value === 'draft';
+    const entriesXml = dataArray.map((item, index) => { const dateObj = new Date(Date.now() - (index * 60000)); const uniqueId = Date.now() + index + (part * 777); const entryId = `tag:blogger.com,1999:blog-${BLOG_ID}.post-${uniqueId}`; const esc = (s) => s.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]); const cats = item.labels.map(l => `<category scheme="http://www.blogger.com/atom/ns#" term="${esc(l)}" />`).join('\n'); const draftXml = isDraft ? `<app:control xmlns:app='http://www.w3.org/2007/app'><app:draft>yes</app:draft></app:control>` : ''; return `<entry><id>${entryId}</id><published>${dateObj.toISOString()}</published><updated>${dateObj.toISOString()}</updated>${draftXml}<category scheme="http://schemas.google.com/g/2005#kind" term="http://schemas.google.com/blogger/2008/kind#post" /><title type="text">${esc(item.title)}</title><content type="html">${esc(item.content)}</content><author><name>Admin</name></author></entry>`; }).join('\n');
+    return `<?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom' xmlns:blogger='http://schemas.google.com/blogger/2008'><id>tag:blogger.com,1999:blog-${BLOG_ID}</id><title type='text'>${filename}</title><generator>Blogger</generator>${entriesXml}</feed>`;
+}
+function dlSeries() { 
+    if (!selectedManga) return;
+    const m = selectedManga;
+    const cleanTitle = document.getElementById('m-title').value.replace(/,/g, ''); 
+    // ดึงเรื่องย่อจากกล่องข้อความที่ให้ผู้ใช้แก้ไขได้
+    const finalDesc = document.getElementById('m-desc') ? document.getElementById('m-desc').value : m.desc;
+    
+    const content = `\n<div id="synopsis">\n<p>${finalDesc.replace(/<[^>]*>/g, "").replace(/\n/g, '<BR>')}</p>\n</div>\n\n<span><a name='more'></a></span>\n\n\n<div class="separator" style="clear: both;">\n  <a href="${m.cover}" style="display: block; padding: 1em 0; text-align: center;">\n    <img alt="${cleanTitle}" border="0" height="200" src="${m.cover}"/>\n  </a>\n</div>\n\n\n<dl id="extra-info">\n  <dt>โรมาจิ:</dt><dd>${m.romaji}</dd>\n  <dt>อังกฤษ:</dt><dd>${m.english}</dd>\n  <dt>ญี่ปุ่น:</dt><dd>${m.native}</dd>\n  <dt>ผู้แต่ง:</dt><dd>${m.authors}</dd>\n  <dt>ผู้วาด:</dt><dd>${m.artists}</dd>\n</dl>\n\n\n<script>\n  clwd.run('${cleanTitle}');\n<\/script>`;
+    const labels = ["Series", cleanTitle, m.type, ...m.genres, m.status, "8.0"]; 
+    saveXML(buildVerifiedBloggerXML([{ title: cleanTitle, content, labels }], `Series_${cleanTitle}`, 0), `Series_${cleanTitle}.xml`);
+}
+function generateChapters(startRange, endRange, part) { 
+    if (!selectedManga) return; 
+    const title = document.getElementById('m-title').value; const entries = [];
+    for (let i = endRange; i >= startRange; i--) { 
+        const chapTitle = `${title} ตอนที่ ${i.toString().padStart(3, '0')}`;
+        const rawContent = document.getElementById(`cap-val-${i}`).value; 
+        entries.push({ title: chapTitle, content: cleanHTML(rawContent, chapTitle) || `<img src="https://placehold.co/800x1200?text=${i}">`, labels: [title, "Chapter"] });
+    } 
+    saveXML(buildVerifiedBloggerXML(entries, `${title}_P${part}`, part), `Chapters_${title}_P${part}.xml`); 
+}
+function renderPackButtons() { 
+    let startParsed = parseInt(document.getElementById('m-start').value);
+    const start = isNaN(startParsed) ? 1 : startParsed;
+    
+    let endParsed = parseInt(document.getElementById('m-end').value);
+    const end = isNaN(endParsed) ? 0 : endParsed;
+    const container = document.getElementById('chap-btns');
+    container.innerHTML = ""; if (isNaN(start) || isNaN(end) || end < start) return;
+    const parts = Math.ceil((end - start + 1) / POST_LIMIT);
+    for (let i = 0; i < parts; i++) { 
+        const pStart = start + (i * POST_LIMIT);
+        const pEnd = Math.min(start + ((i + 1) * POST_LIMIT) - 1, end); const btn = document.createElement('button');
+        btn.className = "bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded-xl text-[10px] font-mono transition-all active:scale-95 shadow-md shadow-amber-500/20"; 
+        btn.innerHTML = `ชุด ${i+1} (${pStart}-${pEnd})`;
+        btn.onclick = () => generateChapters(pStart, pEnd, i + 1); container.appendChild(btn);
+    } 
+}
+function saveXML(xml, name) { 
+    // เติม BOM เพื่อแก้ปัญหาภาษาไทยให้ Blogger Importer อ่านออก
+    const blob = new Blob(["\ufeff", xml], { type: 'application/xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = name.replace(/\s+/g, '_'); a.click();
+}
+
+document.addEventListener('click', (e) => { 
+    if (!e.target.closest('#search-import')) { 
+        const sr = document.getElementById('search-results'); 
+        if(sr) sr.classList.add('hidden'); 
+    } 
+});
+/*]]>*/
+</script>
+
+
+
+<script id="script-auto-fetch">
+/*<![CDATA[*/
+
+// ฟังก์ชันสื่อสารกับ Extension
+function fetchViaExtension(url) {
+    return new Promise((resolve) => {
+        const listener = (event) => {
+            if (event.source !== window || !event.data || event.data.type !== "MANGA_FETCH_RESULT") return;
+            if (event.data.url === url) {
+                window.removeEventListener("message", listener);
+                resolve(event.data.data);
+            }
+        };
+        window.addEventListener("message", listener);
+        
+        // สั่งให้ Extension ทำงาน!
+        window.postMessage({ type: "MANGA_FETCH_REQUEST", url: url }, "*");
+
+        // ถ้า 15 วินาทีแล้วบอทไม่ตอบ ถือว่า error (กันค้าง)
+        setTimeout(() => {
+            window.removeEventListener("message", listener);
+            resolve({ error: "Timeout: ตรวจสอบว่าเปิดใช้งาน Extension หรือยัง?" });
+        }, 15000);
+    });
+}
+
+// ฟังก์ชันเวลากดปุ่ม "ดึงรูป"
+async function autoFetchChapter(i) {
+    const urlEl = document.getElementById(`fetch-url-${i}`);
+    const textarea = document.getElementById(`cap-val-${i}`);
+    const statusEl = document.getElementById(`fetch-status-${i}`);
+    const btn = document.getElementById(`fetch-btn-${i}`);
+    const url = urlEl?.value.trim();
+    
+    if (!url) { 
+        Swal.fire({ title: 'คำเตือน', html: 'กรุณาใส่ URL ของตอนที่ต้องการ', icon: 'warning' });
+        return; 
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i>&nbsp;กำลังแอบดึง...`;
+    statusEl.innerHTML = `<span class="text-amber-400">⏳ บอทกำลังเข้าไปกวาดรูป (รอประมาณ 4 วิ)...</span>`;
+    lucide.createIcons();
+    
+    // เรียกใช้งาน Extension แทนการใช้ fetch ดิบๆ แบบเดิม
+    const result = await fetchViaExtension(url);
+    
+    if (result.error) {
+        statusEl.innerHTML = `<span class="text-red-400">❌ ${result.error}</span>`;
+    } else if (result.success && result.images.length > 0) {
+        // วางรูปในกล่อง Textarea
+        textarea.value = result.images.join('\n');
+        statusEl.innerHTML = `<span class="text-teal-400">✅ กวาดมาได้ ${result.images.length} รูป! (ตัดโฆษณาแล้ว)</span>`;
+    } else {
+        statusEl.innerHTML = `<span class="text-red-400">❌ ไม่พบรูปมังงะในลิงก์นี้</span>`;
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = `<i data-lucide="download" class="w-3 h-3"></i>&nbsp;ดึงรูป`;
+    lucide.createIcons();
+}
+
+// ส่วนฟังก์ชัน Bulk Fetch ก็สามารถใช้งานได้ตามปกติแล้วครับ
+async function bulkAutoFetch() {
+    const pattern = document.getElementById('bulk-url-pattern')?.value.trim();
+    if (!pattern?.includes('{n}')) {
+        Swal.fire({ title: 'คำเตือน', html: 'ใส่ URL ที่มี <b>{n}</b> แทนเลขตอน', icon: 'warning' });
+        return;
+    }
+    const start = parseInt(document.getElementById('m-start').value);
+    const end = parseInt(document.getElementById('m-end').value);
+    if (isNaN(start) || isNaN(end) || end < start) { 
+        Swal.fire({title: 'คำเตือน', html: 'ตั้งค่าตอนเริ่มต้น/สิ้นสุดก่อน', icon: 'warning'}); 
+        return;
+    }
+    
+    const { isConfirmed } = await Swal.fire({
+        title: `สั่งบอทดึง ${end - start + 1} ตอนรวด?`,
+        icon: 'question', showCancelButton: true,
+        confirmButtonText: 'ลุยเลย!', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#0d9488'
+    });
+    
+    if (!isConfirmed) return;
+    
+    for (let i = start; i <= end; i++) {
+        const urlEl = document.getElementById(`fetch-url-${i}`);
+        if (urlEl) {
+            urlEl.value = pattern.replace(/\{n\}/g, i);
+            await autoFetchChapter(i); // มันจะรอให้ดึงเสร็จทีละตอนอัตโนมัติ
+        }
+    }
+    Swal.fire({ title: 'เสร็จสิ้น!', html: 'บอทดึงครบทุกตอนแล้ว ✅', icon: 'success' });
+}
+/*]]>*/
+</script>
+
+
+</div>
